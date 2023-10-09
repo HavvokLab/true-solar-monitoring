@@ -1,0 +1,30 @@
+elasticsearch:
+  host: http://localhost:9200
+  username:
+  password:
+  solar_index: solarcell
+  site_station_index: site-station
+  daily_production_index: daily_production
+  monthly_production_index: monthly_production
+
+redis:
+  host: localhost
+  port: 6379
+  username:
+  password: abcd1234
+  db: 0
+
+snmp:
+  agent_host: 10.50.89.234
+  target_host: 10.50.197.29
+  target_port: 22010
+
+low_performance_alarm:
+  crontab: "*/5 * * * *"
+
+sum_performance_alarm:
+  crontab: "*/5 * * * *"
+
+solarman:
+  collector_crontab: "*/5 * * * *" 
+  alarm_crontab: "*/5 * * * *"
