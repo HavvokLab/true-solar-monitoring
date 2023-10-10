@@ -226,7 +226,7 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 	)
 
 	// |=> production_to_target
-	const productionToTargetScript = "if (params.installed_capacity == 0 || params.daily_production == 0 ) { return 0 } else { (params.daily_production/(params.installed_capacity*5*0.8*31))*100 }"
+	const productionToTargetScript = "if (params.installed_capacity == 0 || params.monthly_production == 0 ) { return 0 } else { (params.monthly_production/(params.installed_capacity*5*0.8*31))*100 }"
 
 	compositeAggregation = compositeAggregation.SubAggregation(
 		"production_to_target",
