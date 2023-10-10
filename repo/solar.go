@@ -231,7 +231,7 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 	compositeAggregation = compositeAggregation.SubAggregation(
 		"production_to_target",
 		elastic.NewBucketScriptAggregation().
-			BucketsPathsMap(map[string]string{"installed_capacity": "installed_capacity", "daily_production": "daily_production"}).
+			BucketsPathsMap(map[string]string{"installed_capacity": "installed_capacity", "monthly_production": "monthly_production"}).
 			Script(elastic.NewScript(productionToTargetScript)),
 	)
 
