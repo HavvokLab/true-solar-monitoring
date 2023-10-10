@@ -14,6 +14,8 @@ import (
 	"go.openly.dev/pointy"
 )
 
+var ErrDailyProductionUnderThreshold = errors.New("daily production under threshold")
+
 type DailyPerformanceAlarmService interface {
 	Run() error
 }
@@ -121,6 +123,10 @@ func (s *dailyPerformanceAlarmService) Run() error {
 
 			plantName, alarmName, payload, severity, err := s.getPayload(&date, dailyProduction, threshold, plantItem, *installedCapacityConfig, *config)
 			if err != nil {
+				if errors.Is(err, ErrDailyProductionUnderThreshold) {
+					continue
+				}
+
 				s.logger.Error(err)
 				continue
 			}
@@ -145,7 +151,7 @@ func (s *dailyPerformanceAlarmService) Run() error {
 }
 
 func (s *dailyPerformanceAlarmService) getConfig() (*model.PerformanceAlarmConfig, error) {
-	config, err := s.performanceAlarmConfigRepo.GetDailyPerformanceAlarmConfig()
+	config, err := s.performanceAlarmConfigRepo.GetLowPerformanceAlarmConfig()
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err
@@ -206,12 +212,12 @@ func (p *dailyPerformanceAlarmService) getPayload(date *time.Time, dailyProducti
 	plantName = pointy.StringValue(plantItem.Name, "")
 	alarmName = fmt.Sprintf("SolarCell-%s", strings.ReplaceAll(alarmConfig.Name, " ", ""))
 	alarmNameInPayload := util.AddSpace(alarmConfig.Name)
-	if threshold > dailyProduction {
-		severity = constant.MAJOR_SEVERITY
-		payload = fmt.Sprintf("%s, %s, Less than %.2f%%, Expected Daily Production:%.2f KWH, Actual Production:%.2f KWH, Date:%s", vendorType, alarmNameInPayload, alarmConfig.Percentage, threshold, dailyProduction, date.Format("2006-01-02"))
-	} else {
+	if dailyProduction > threshold {
 		severity = constant.CLEAR_SEVERITY
 		payload = fmt.Sprintf("%s, %s, More than or equal %.2f%%, Expected Daily Production:%.2f KWH, Actual Production:%.2f KWH, Date:%s", vendorType, alarmNameInPayload, alarmConfig.Percentage, threshold, dailyProduction, date.Format("2006-01-02"))
+	} else {
+		err = ErrDailyProductionUnderThreshold
+		return
 	}
 
 	return

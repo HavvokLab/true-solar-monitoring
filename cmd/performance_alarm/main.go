@@ -18,10 +18,13 @@ func init() {
 }
 
 func main() {
-	conf := config.GetConfig().DailyPerformanceAlarm
+	dailyPerformanceAlarmConfig := config.GetConfig().DailyPerformanceAlarm
+	lowPerformanceAlarmConfig := config.GetConfig().LowPerformanceAlarm
 	dailyPerformanceAlarm := handler.NewDailyPerformanceAlarmHandler()
+	lowPerformanceAlarm := handler.NewLowPerformanceAlarmHandler()
 
 	cron := gocron.NewScheduler(time.Local)
-	cron.Cron(conf.Crontab).Do(dailyPerformanceAlarm.Run)
+	cron.Cron(dailyPerformanceAlarmConfig.Crontab).Do(dailyPerformanceAlarm.Run)
+	cron.Cron(lowPerformanceAlarmConfig.Crontab).Do(lowPerformanceAlarm.Run)
 	cron.StartBlocking()
 }
