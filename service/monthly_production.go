@@ -147,6 +147,7 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 
 		doc.ClearZeroValue()
 
+		s.logger.Infof("[%v/%v] generateDocument vendor_type: %v, name: %v, monthly_production: %v, target: %v, product2target: %v, criteria: %v", doc.VendorType, doc.SiteName, doc.MonthlyProduction, doc.Target, doc.ProductionToTarget, doc.Criteria)
 		count += 1
 		s.logger.Infof("[%v/%v] generateDocument of %v", count, size, start.Format(constant.YEAR_MONTH))
 		documents = append(documents, doc)

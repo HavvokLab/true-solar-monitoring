@@ -71,7 +71,7 @@ func (d *MonthlyProductionDocument) SetTarget(data *float64) {
 
 func (d *MonthlyProductionDocument) SetCriteria(data *float64) {
 	if data == nil {
-		d.Criteria = nil
+		d.Criteria = pointy.String("-")
 	}
 
 	value := pointy.Float64Value(data, 0)
@@ -84,7 +84,7 @@ func (d *MonthlyProductionDocument) SetCriteria(data *float64) {
 	} else if value >= 50 {
 		d.Criteria = pointy.String(">=50%")
 	} else {
-		d.Criteria = pointy.String("-")
+		d.Criteria = pointy.String("<50")
 	}
 }
 

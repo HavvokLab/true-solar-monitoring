@@ -71,10 +71,10 @@ func (d *DailyProductionDocument) SetTarget(data *float64) {
 
 func (d *DailyProductionDocument) SetCriteria(data *float64) {
 	if data == nil {
-		d.Criteria = nil
+		d.Criteria = pointy.String("-")
 	}
 
-	value := pointy.Float64Value(data, 0)
+	value := pointy.Float64Value(data, 0.0)
 	if value >= 100 {
 		d.Criteria = pointy.String(">=100%")
 	} else if value >= 80 {
@@ -84,7 +84,7 @@ func (d *DailyProductionDocument) SetCriteria(data *float64) {
 	} else if value >= 50 {
 		d.Criteria = pointy.String(">=50%")
 	} else {
-		d.Criteria = pointy.String("-")
+		d.Criteria = pointy.String("<50%")
 	}
 }
 
