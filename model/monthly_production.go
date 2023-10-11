@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/HavvokLab/true-solar-monitoring/util"
@@ -14,8 +15,8 @@ type MonthlyProductionDocument struct {
 	SiteName           *string    `json:"site_name"`
 	InstalledCapacity  *float64   `json:"installed_capacity"`
 	MonthlyProduction  *float64   `json:"monthly_production"`
-	Latitude           *float64   `json:"lat"`
-	Longitude          *float64   `json:"lng"`
+	Latitude           *string    `json:"lat"`
+	Longitude          *string    `json:"lng"`
 	Target             *float64   `json:"target"`
 	ProductionToTarget *float64   `json:"production_to_target"`
 	Criteria           *string    `json:"criteria"`
@@ -54,11 +55,21 @@ func (d *MonthlyProductionDocument) SetMonthlyProduction(data *float64) {
 }
 
 func (d *MonthlyProductionDocument) SetLatitude(data *float64) {
-	d.Latitude = data
+	if data == nil {
+		d.Latitude = nil
+		return
+	}
+
+	d.Latitude = pointy.String(fmt.Sprintf("%.7f", *data))
 }
 
 func (d *MonthlyProductionDocument) SetLongitude(data *float64) {
-	d.Longitude = data
+	if data == nil {
+		d.Longitude = nil
+		return
+	}
+
+	d.Longitude = pointy.String(fmt.Sprintf("%.7f", *data))
 }
 
 func (d *MonthlyProductionDocument) SetProductionToTarget(data *float64) {
