@@ -9,7 +9,6 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/model"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
-	"github.com/bytedance/sonic"
 	"go.openly.dev/pointy"
 )
 
@@ -109,6 +108,14 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 		}
 
 		// took data from max_aggregation
+		if val, ok := item.Aggregations.Max("lat"); ok {
+			doc.SetLatitude(val.Value)
+		}
+
+		if val, ok := item.Aggregations.Max("long"); ok {
+			doc.SetLongitude(val.Value)
+		}
+
 		if val, ok := item.Aggregations.Max("installed_capacity"); ok {
 			doc.SetInstalledCapacity(val.Value)
 		}
@@ -126,26 +133,6 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 			doc.SetProductionToTarget(val.Value)
 		}
 		doc.SetCriteria(doc.ProductionToTarget)
-
-		// took data from hits
-		if hits, ok := item.TopHits("hits"); ok {
-			if hits.Hits != nil {
-				if len(hits.Hits.Hits) == 1 {
-					hit := hits.Hits.Hits[0]
-					source := make(map[string]float64)
-					if err := sonic.Unmarshal(hit.Source, &source); err == nil {
-						if val, ok := source["lat"]; ok {
-							doc.SetLatitude(&val)
-						}
-
-						if val, ok := source["lng"]; ok {
-							doc.SetLongitude(&val)
-						}
-					}
-				}
-			}
-		}
-
 		doc.ClearZeroValue()
 
 		s.logger.Infof("[%v/%v] generateDocument vendor_type: %v, name: %v, monthly_production: %v, target: %v, product2target: %v, criteria: %v",
@@ -181,8 +168,8 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 			SiteName:           site.SiteName,
 			InstalledCapacity:  site.InstalledCapacity,
 			DailyProduction:    nil,
-			Latitude:           pointy.String(fmt.Sprintf("%.7f", *site.Latitude)),
-			Longitude:          pointy.String(fmt.Sprintf("%.7f", *site.Longitude)),
+			Latitude:           site.Latitude,
+			Longitude:          site.Longitude,
 			Target:             nil,
 			ProductionToTarget: nil,
 			Criteria:           nil,

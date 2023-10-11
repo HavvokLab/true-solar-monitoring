@@ -116,15 +116,22 @@ func (r *solarRepo) GetPlantDailyProduction(start, end *time.Time) ([]*elastic.A
 	compositeAggregation = compositeAggregation.
 		SubAggregation("installed_capacity", elastic.NewMaxAggregation().Field("installed_capacity")).
 		SubAggregation("monthly_production", elastic.NewMaxAggregation().Field("monthly_production")).
-		SubAggregation("daily_production", elastic.NewMaxAggregation().Field("daily_production"))
-
-	// assign [hit_aggregation] into composite aggregation
-	compositeAggregation = compositeAggregation.
+		SubAggregation("daily_production", elastic.NewMaxAggregation().Field("daily_production")).
 		SubAggregation(
-			"hits",
-			elastic.NewTopHitsAggregation().
-				Size(1).
-				FetchSourceContext(elastic.NewFetchSourceContext(true).Include("lat", "lng")),
+			"lat",
+			elastic.NewMaxAggregation().
+				Script(
+					elastic.NewScript("if (doc['location'].size() == 0) {return 0} else {doc['location'].lat}").
+						Lang("painless"),
+				),
+		).
+		SubAggregation(
+			"long",
+			elastic.NewMaxAggregation().
+				Script(
+					elastic.NewScript("if (doc['location'].size() == 0) {return 0} else {doc['location'].lon}").
+						Lang("painless"),
+				),
 		)
 
 	// assign [bucket_script_aggregation] into composite aggregation
@@ -203,15 +210,22 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 	compositeAggregation = compositeAggregation.
 		SubAggregation("installed_capacity", elastic.NewMaxAggregation().Field("installed_capacity")).
 		SubAggregation("monthly_production", elastic.NewMaxAggregation().Field("monthly_production")).
-		SubAggregation("daily_production", elastic.NewMaxAggregation().Field("daily_production"))
-
-	// assign [hit_aggregation] into composite aggregation
-	compositeAggregation = compositeAggregation.
+		SubAggregation("daily_production", elastic.NewMaxAggregation().Field("daily_production")).
 		SubAggregation(
-			"hits",
-			elastic.NewTopHitsAggregation().
-				Size(1).
-				FetchSourceContext(elastic.NewFetchSourceContext(true).Include("lat", "lng")),
+			"lat",
+			elastic.NewMaxAggregation().
+				Script(
+					elastic.NewScript("if (doc['location'].size() == 0) {return 0} else {doc['location'].lat}").
+						Lang("painless"),
+				),
+		).
+		SubAggregation(
+			"long",
+			elastic.NewMaxAggregation().
+				Script(
+					elastic.NewScript("if (doc['location'].size() == 0) {return 0} else {doc['location'].lon}").
+						Lang("painless"),
+				),
 		)
 
 	// assign [bucket_script_aggregation] into composite aggregation
