@@ -149,6 +149,8 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 		doc.ClearZeroValue()
 
 		s.logger.Infof("[%v/%v] generateDocument vendor_type: %v, name: %v, monthly_production: %v, target: %v, product2target: %v, criteria: %v",
+			count,
+			size,
 			*doc.VendorType,
 			*doc.SiteName,
 			pointy.Float64Value(doc.MonthlyProduction, 0.0),
