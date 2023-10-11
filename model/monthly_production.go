@@ -72,6 +72,7 @@ func (d *MonthlyProductionDocument) SetTarget(data *float64) {
 func (d *MonthlyProductionDocument) SetCriteria(data *float64) {
 	if data == nil {
 		d.Criteria = pointy.String("-")
+		return
 	}
 
 	value := pointy.Float64Value(data, 0)
