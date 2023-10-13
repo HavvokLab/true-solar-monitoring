@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+// TODO: add owner field for assign -> TRUE, ALTERVIM
 type PlantItem struct {
 	Timestamp         time.Time  `json:"@timestamp"`
 	Month             string     `json:"month"`

@@ -17,6 +17,7 @@ func init() {
 	util.SetTimezone()
 }
 
+// TODO: Filter plant_name with contain "_WEALTH" out
 func main() {
 	conf := config.GetConfig().Solarman
 

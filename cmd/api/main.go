@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/HavvokLab/true-solar-monitoring/config"
-	"github.com/HavvokLab/true-solar-monitoring/constant"
-	"github.com/HavvokLab/true-solar-monitoring/infra"
-	"github.com/HavvokLab/true-solar-monitoring/repo"
+	"github.com/HavvokLab/true-solar-monitoring/inverter/kstar"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 )
 
 func init() {
@@ -17,16 +14,13 @@ func init() {
 }
 
 func main() {
-	db, err := infra.NewGormDB()
+	username := "u2.kst"
+	password := "Truec[8mugiup18"
+	client := kstar.NewKStarClient(username, password)
+	res, err := client.GetRealtimeAlarmListOfDevice("I110261077A7021010003321")
 	if err != nil {
 		panic(err)
 	}
 
-	repo := repo.NewHuaweiCredentialRepo(db)
-	data, err := repo.GetCredentialsByOwner(constant.TRUE_OWNER)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(data)
+	util.PrintJSON(map[string]interface{}{"x": res})
 }

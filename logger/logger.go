@@ -10,6 +10,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+// TODO: remove logs age and turn into separate log by days
 type Logger interface {
 	Debug(string)
 	Info(string)

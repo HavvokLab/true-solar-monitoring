@@ -79,6 +79,22 @@ GET solarcell-2023.*/_search
                         ]
                     }
                 },
+                "lat": {
+                  "max": {
+                    "script": {
+                      "source": "if (doc['location'].size() == 0) {return 0} else {doc['location'].lat}",
+                      "lang": "painless"
+                    }
+                  }
+                },
+                "lon": {
+                  "max": {
+                    "script": {
+                      "source": "if (doc['location'].size() == 0) {return 0} else {doc['location'].lon}",
+                      "lang": "painless"
+                    }
+                  }
+                },
                 "installed_capacity": {
                     "max": {
                         "field": "installed_capacity"
