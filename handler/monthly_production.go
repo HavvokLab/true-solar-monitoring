@@ -19,7 +19,7 @@ func NewMonthlyProductionHandler() *MonthlyProductionHandler {
 	return &MonthlyProductionHandler{}
 }
 
-func (h *MonthlyProductionHandler) Run() {
+func (h *MonthlyProductionHandler) RunAll() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
 			LogName:     constant.MONTHLY_PRODUCTION_LOG_NAME,
@@ -50,6 +50,28 @@ func (h *MonthlyProductionHandler) Run() {
 	}
 
 	pool.StopWait()
+}
+
+func (h *MonthlyProductionHandler) Run() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.MONTHLY_PRODUCTION_LOG_NAME,
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
+	defer h.logger.Close()
+
+	now := time.Now()
+	if now.Day() == 1 {
+		end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+		start := end.AddDate(0, -1, 0)
+		h.run(&start, &end)
+	}
 }
 
 func (h *MonthlyProductionHandler) run(start, end *time.Time) func() {

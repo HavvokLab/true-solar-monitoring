@@ -16,5 +16,5 @@ func init() {
 
 func main() {
 	monthlyProduction := handler.NewMonthlyProductionHandler()
-	monthlyProduction.Run()
+	monthlyProduction.RunAll()
 }

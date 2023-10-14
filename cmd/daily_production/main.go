@@ -16,5 +16,5 @@ func init() {
 
 func main() {
 	dailyProduction := handler.NewDailyProductionHandler()
-	dailyProduction.Run()
+	dailyProduction.RunAll()
 }

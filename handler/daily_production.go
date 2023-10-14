@@ -20,7 +20,7 @@ func NewDailyProductionHandler() *DailyProductionHandler {
 	return &DailyProductionHandler{}
 }
 
-func (h *DailyProductionHandler) Run() {
+func (h *DailyProductionHandler) RunAll() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
 			LogName:     constant.DAILY_PRODUCTION_LOG_NAME,
@@ -47,6 +47,26 @@ func (h *DailyProductionHandler) Run() {
 		initialDate = end
 	}
 	pool.StopWait()
+}
+
+func (h *DailyProductionHandler) Run() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.DAILY_PRODUCTION_LOG_NAME,
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
+	defer h.logger.Close()
+
+	now := time.Now()
+	end := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	start := end.AddDate(0, 0, -1)
+	h.run(&start, &end)
 }
 
 func (h *DailyProductionHandler) run(start, end *time.Time) func() {

@@ -4,6 +4,7 @@ type Config struct {
 	Elastic               ElasticsearchConfig `mapstructure:"elasticsearch"`
 	Redis                 RedisConfig         `mapstructure:"redis"`
 	Snmp                  SnmpConfig          `mapstructure:"snmp"`
+	CalculateProduction   AlarmConfig         `mapstructure:"calculate_production"`
 	LowPerformanceAlarm   AlarmConfig         `mapstructure:"low_performance_alarm"`
 	SumPerformanceAlarm   AlarmConfig         `mapstructure:"sum_performance_alarm"`
 	DailyPerformanceAlarm AlarmConfig         `mapstructure:"daily_performance_alarm"`
