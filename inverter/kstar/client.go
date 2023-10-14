@@ -3,6 +3,7 @@ package kstar
 import (
 	"crypto/md5"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -22,23 +23,30 @@ type KStarClient interface {
 	GetRealtimeAlarmListOfPlant(from, to int64) ([]*DeviceAlarmInfoItem, error)
 }
 
+type KStarCredential struct {
+	Username string
+	Password string
+}
+
 type kstarClient struct {
 	URL      string
 	username string
 	password string
 }
 
-func NewKStarClient(
-	username, password string,
-) KStarClient {
-	client := kstarClient{
-		URL:      URL_VERSION1,
-		username: username,
-		password: password,
+func NewKStarClient(credential *KStarCredential) (KStarClient, error) {
+	if credential == nil {
+		return nil, errors.New("credential must not be empty")
 	}
 
-	client.password = client.DecodePassword(password)
-	return &client
+	client := kstarClient{
+		URL:      URL_VERSION1,
+		username: credential.Username,
+		password: credential.Password,
+	}
+
+	client.password = client.DecodePassword(client.password)
+	return &client, nil
 }
 
 func (c *kstarClient) DecodePassword(password string) string {

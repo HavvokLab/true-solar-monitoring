@@ -16,7 +16,7 @@ func init() {
 func main() {
 	username := "u2.kst"
 	password := "Truec[8mugiup18"
-	client := kstar.NewKStarClient(username, password)
+	client, nil := kstar.NewKStarClient(&kstar.KStarCredential{Username: username, Password: password})
 	res, err := client.GetRealtimeAlarmListOfDevice("I110261077A7021010003321")
 	if err != nil {
 		panic(err)

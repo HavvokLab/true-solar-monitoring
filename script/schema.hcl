@@ -82,6 +82,41 @@ table "tbl_huawei_credentials" {
   }
 }
 
+table "tbl_kstar_credentials" {
+  schema = schema.main
+
+  column "id" {
+    null           = false
+    type           = integer
+    auto_increment = true
+  }
+
+  column "username" {
+    type = varchar(256)
+  }
+
+  column "password" {
+    type = varchar(256)
+  }
+
+  column "created_at" {
+    null    = false
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  column "updated_at" {
+    null      = false
+    type      = datetime
+    default   = sql("CURRENT_TIMESTAMP")
+    on_update = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+}
+
 table "tbl_installed_capacity" {
   schema = schema.main
 
