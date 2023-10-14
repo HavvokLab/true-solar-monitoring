@@ -17,9 +17,13 @@ type DailyProductionHandler struct {
 }
 
 func NewDailyProductionHandler() *DailyProductionHandler {
-	logger := logger.NewLogger(
+	return &DailyProductionHandler{}
+}
+
+func (h *DailyProductionHandler) Run() {
+	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.DAILY_PRODUCTION_LOG_NAME),
+			LogName:     constant.DAILY_PRODUCTION_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -28,12 +32,8 @@ func NewDailyProductionHandler() *DailyProductionHandler {
 			SkipCaller:  1,
 		},
 	)
-
-	return &DailyProductionHandler{logger: logger}
-}
-
-func (h *DailyProductionHandler) Run() {
 	defer h.logger.Close()
+
 	pool := workerpool.New(10)
 	startExecute := time.Date(2023, time.January, 1, 0, 0, 0, 0, time.Local)
 	endExecute := time.Now()

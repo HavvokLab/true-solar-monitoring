@@ -17,25 +17,13 @@ type SolarmanAlarmHandler struct {
 }
 
 func NewSolarmanAlarmHandler() *SolarmanAlarmHandler {
-	logger := logger.NewLogger(
-		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.SOLARMAN_ALARM_LOG_NAME),
-			LogSize:     1024,
-			LogAge:      90,
-			LogBackup:   1,
-			LogCompress: false,
-			LogLevel:    logger.LOG_LEVEL_DEBUG,
-			SkipCaller:  1,
-		},
-	)
-
-	return &SolarmanAlarmHandler{logger: logger}
+	return &SolarmanAlarmHandler{}
 }
 
 func (h *SolarmanAlarmHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.SOLARMAN_ALARM_LOG_NAME),
+			LogName:     constant.SOLARMAN_ALARM_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -96,7 +84,19 @@ func (h *SolarmanAlarmHandler) run(credential *model.SolarmanCredential) func() 
 }
 
 func (h *SolarmanAlarmHandler) Mock() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.SOLARMAN_ALARM_LOG_NAME,
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
 	defer h.logger.Close()
+
 	credentialRepo := repo.NewMockSolarmanCredentialRepo()
 	credentials, err := credentialRepo.GetCredentials()
 	if err != nil {

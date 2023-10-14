@@ -17,25 +17,13 @@ type HuaweiAlarmHandler struct {
 }
 
 func NewHuaweiAlarmHandler() *HuaweiAlarmHandler {
-	logger := logger.NewLogger(
-		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.HUAWEI_ALARM_LOG_NAME),
-			LogSize:     1024,
-			LogAge:      90,
-			LogBackup:   1,
-			LogCompress: false,
-			LogLevel:    logger.LOG_LEVEL_DEBUG,
-			SkipCaller:  1,
-		},
-	)
-
-	return &HuaweiAlarmHandler{logger: logger}
+	return &HuaweiAlarmHandler{}
 }
 
 func (h *HuaweiAlarmHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.HUAWEI_ALARM_LOG_NAME),
+			LogName:     constant.HUAWEI_ALARM_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -99,7 +87,7 @@ func (h *HuaweiAlarmHandler) run(credential *model.HuaweiCredential) func() {
 func (h *HuaweiAlarmHandler) Mock() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.HUAWEI_ALARM_LOG_NAME),
+			LogName:     constant.HUAWEI_ALARM_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,

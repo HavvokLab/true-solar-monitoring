@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/go-playground/validator"
 	"go.uber.org/zap"
@@ -64,11 +65,12 @@ func NewLogger(option *LoggerOption) Logger {
 		return lvl >= zapcore.Level(option.LogLevel)
 	})
 
+	now := time.Now()
+	fileName := fmt.Sprintf("logs/%v/%v.log", option.LogName, now.Format("20060102"))
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   option.LogName,
+		Filename:   fileName,
 		MaxSize:    option.LogSize,
 		MaxBackups: option.LogBackup,
-		MaxAge:     option.LogAge,
 		Compress:   option.LogCompress,
 	}
 

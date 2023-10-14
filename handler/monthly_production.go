@@ -16,9 +16,13 @@ type MonthlyProductionHandler struct {
 }
 
 func NewMonthlyProductionHandler() *MonthlyProductionHandler {
-	logger := logger.NewLogger(
+	return &MonthlyProductionHandler{}
+}
+
+func (h *MonthlyProductionHandler) Run() {
+	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.MONTHLY_PRODUCTION_LOG_NAME),
+			LogName:     constant.MONTHLY_PRODUCTION_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -27,12 +31,8 @@ func NewMonthlyProductionHandler() *MonthlyProductionHandler {
 			SkipCaller:  1,
 		},
 	)
-
-	return &MonthlyProductionHandler{logger: logger}
-}
-
-func (h *MonthlyProductionHandler) Run() {
 	defer h.logger.Close()
+
 	pool := workerpool.New(5)
 	currentMonth := time.January
 	endDate := time.Now()

@@ -17,24 +17,13 @@ type HuaweiCollectorHandler struct {
 }
 
 func NewHuaweiCollectorHandler() *HuaweiCollectorHandler {
-	logger := logger.NewLogger(
-		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.SOLARMAN_COLLECTOR_LOG_NAME),
-			LogSize:     1024,
-			LogAge:      90,
-			LogBackup:   1,
-			LogCompress: false,
-			LogLevel:    logger.LOG_LEVEL_DEBUG,
-			SkipCaller:  1,
-		},
-	)
-	return &HuaweiCollectorHandler{logger: logger}
+	return &HuaweiCollectorHandler{}
 }
 
 func (h *HuaweiCollectorHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.HUAWEI_COLLECTOR_LOG_NAME),
+			LogName:     constant.HUAWEI_COLLECTOR_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,

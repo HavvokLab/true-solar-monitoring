@@ -13,9 +13,13 @@ type LowPerformanceAlarmHandler struct {
 }
 
 func NewLowPerformanceAlarmHandler() *LowPerformanceAlarmHandler {
-	logger := logger.NewLogger(
+	return &LowPerformanceAlarmHandler{}
+}
+
+func (h *LowPerformanceAlarmHandler) Run() {
+	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.LOW_PERFORMANCE_ALARM_LOG_NAME),
+			LogName:     constant.LOW_PERFORMANCE_ALARM_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -24,13 +28,8 @@ func NewLowPerformanceAlarmHandler() *LowPerformanceAlarmHandler {
 			SkipCaller:  1,
 		},
 	)
+	defer h.logger.Close()
 
-	return &LowPerformanceAlarmHandler{
-		logger: logger,
-	}
-}
-
-func (h *LowPerformanceAlarmHandler) Run() {
 	snmp, err := infra.NewSnmp()
 	if err != nil {
 		h.logger.Errorf("Failed to create snmp: %v", err)
@@ -54,7 +53,6 @@ func (h *LowPerformanceAlarmHandler) Run() {
 	performanceAlarmConfigRepo := repo.NewPerformanceAlarmConfigRepo(db)
 	snmpRepo := repo.NewSnmpRepo(snmp)
 	defer snmpRepo.Close()
-	defer h.logger.Close()
 
 	serv := service.NewLowPerformanceAlarmService(solarRepo, installedCapacityRepo, performanceAlarmConfigRepo, snmpRepo, h.logger)
 
@@ -66,6 +64,19 @@ func (h *LowPerformanceAlarmHandler) Run() {
 }
 
 func (h *LowPerformanceAlarmHandler) Mock() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.LOW_PERFORMANCE_ALARM_LOG_NAME,
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
+	defer h.logger.Close()
+
 	elastic, err := infra.NewElasticsearch()
 	if err != nil {
 		h.logger.Errorf("Failed to create elasticsearch: %v", err)
@@ -83,7 +94,6 @@ func (h *LowPerformanceAlarmHandler) Mock() {
 	performanceAlarmConfigRepo := repo.NewPerformanceAlarmConfigRepo(db)
 	snmpRepo := repo.NewMockSnmpRepo()
 	defer snmpRepo.Close()
-	defer h.logger.Close()
 
 	serv := service.NewLowPerformanceAlarmService(solarRepo, installedCapacityRepo, performanceAlarmConfigRepo, snmpRepo, h.logger)
 

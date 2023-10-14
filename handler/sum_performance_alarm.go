@@ -13,9 +13,14 @@ type SumPerformanceAlarmHandler struct {
 }
 
 func NewSumPerformanceAlarmHandler() *SumPerformanceAlarmHandler {
-	logger := logger.NewLogger(
+
+	return &SumPerformanceAlarmHandler{}
+}
+
+func (h *SumPerformanceAlarmHandler) Run() {
+	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.SUM_PERFORMANCE_ALARM_LOG_NAME),
+			LogName:     constant.SUM_PERFORMANCE_ALARM_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -24,13 +29,8 @@ func NewSumPerformanceAlarmHandler() *SumPerformanceAlarmHandler {
 			SkipCaller:  1,
 		},
 	)
+	defer h.logger.Close()
 
-	return &SumPerformanceAlarmHandler{
-		logger: logger,
-	}
-}
-
-func (h *SumPerformanceAlarmHandler) Run() {
 	snmp, err := infra.NewSnmp()
 	if err != nil {
 		h.logger.Errorf("Failed to create snmp: %v", err)
@@ -54,7 +54,6 @@ func (h *SumPerformanceAlarmHandler) Run() {
 	performanceAlarmConfigRepo := repo.NewPerformanceAlarmConfigRepo(db)
 	snmpRepo := repo.NewSnmpRepo(snmp)
 	defer snmpRepo.Close()
-	defer h.logger.Close()
 
 	serv := service.NewSumPerformanceAlarmService(solarRepo, installedCapacityRepo, performanceAlarmConfigRepo, snmpRepo, h.logger)
 
@@ -66,6 +65,19 @@ func (h *SumPerformanceAlarmHandler) Run() {
 }
 
 func (h *SumPerformanceAlarmHandler) Mock() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.SUM_PERFORMANCE_ALARM_LOG_NAME,
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
+	defer h.logger.Close()
+
 	elastic, err := infra.NewElasticsearch()
 	if err != nil {
 		h.logger.Errorf("Failed to create elasticsearch: %v", err)
@@ -83,7 +95,6 @@ func (h *SumPerformanceAlarmHandler) Mock() {
 	performanceAlarmConfigRepo := repo.NewPerformanceAlarmConfigRepo(db)
 	snmpRepo := repo.NewMockSnmpRepo()
 	defer snmpRepo.Close()
-	defer h.logger.Close()
 
 	serv := service.NewSumPerformanceAlarmService(solarRepo, installedCapacityRepo, performanceAlarmConfigRepo, snmpRepo, h.logger)
 

@@ -17,25 +17,13 @@ type SolarmanCollectorHandler struct {
 }
 
 func NewSolarmanCollectorHandler() *SolarmanCollectorHandler {
-	logger := logger.NewLogger(
-		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.SOLARMAN_COLLECTOR_LOG_NAME),
-			LogSize:     1024,
-			LogAge:      90,
-			LogBackup:   1,
-			LogCompress: false,
-			LogLevel:    logger.LOG_LEVEL_DEBUG,
-			SkipCaller:  1,
-		},
-	)
-
-	return &SolarmanCollectorHandler{logger: logger}
+	return &SolarmanCollectorHandler{}
 }
 
 func (h *SolarmanCollectorHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.GetLogName(constant.SOLARMAN_COLLECTOR_LOG_NAME),
+			LogName:     constant.SOLARMAN_COLLECTOR_LOG_NAME,
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -100,6 +88,17 @@ func (h *SolarmanCollectorHandler) run(credential *model.SolarmanCredential) fun
 }
 
 func (h *SolarmanCollectorHandler) Mock() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.SOLARMAN_COLLECTOR_LOG_NAME,
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
 	defer h.logger.Close()
 	credentialRepo := repo.NewMockSolarmanCredentialRepo()
 	credentials, err := credentialRepo.GetCredentials()
