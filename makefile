@@ -45,3 +45,9 @@ huawei_build:
 
 prod_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o production ./cmd/production/main.go
+
+kstar:
+	go run ./cmd/kstar/main.go
+
+kstar_build:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o kstar ./cmd/kstar/main.go

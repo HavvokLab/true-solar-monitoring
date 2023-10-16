@@ -60,12 +60,17 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 		return err
 	}
 
+	deviceCount := 1
+	deviceSize := len(deviceList)
 	for _, device := range deviceList {
 		deviceID := device.GetID()
 		deviceName := device.GetName()
 		plantID := device.GetPlantID()
 		plantName := device.GetPlantName()
 		saveTime := device.GetSaveTime()
+
+		s.logger.Infof("[%v] - KStarAlarmService.Run(): device %v/%v, deviceID: %v, deviceName: %v, plantID: %v, plantName: %v, saveTime: %v", credential.Username, deviceCount, deviceSize, deviceID, deviceName, plantID, plantName, saveTime)
+		deviceCount++
 
 		realtimeDeviceDataResp, err := client.GetRealtimeDeviceData(deviceID)
 		if err != nil {

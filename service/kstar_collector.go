@@ -17,6 +17,7 @@ import (
 )
 
 type KStarCollectorService interface {
+	Run(credential *model.KStarCredential) error
 }
 
 type kstarCollectorService struct {
@@ -30,7 +31,7 @@ type kstarCollectorService struct {
 
 func NewKStarCollectorService(
 	solarRepo repo.SolarRepo, siteRegionRepo repo.SiteRegionMappingRepo, logger logger.Logger,
-) KStarCollectorService {
+) (KStarCollectorService, error) {
 	return &kstarCollectorService{
 		vendorType:     strings.ToUpper(constant.VENDOR_TYPE_KSTAR),
 		siteRegionRepo: siteRegionRepo,
@@ -38,7 +39,7 @@ func NewKStarCollectorService(
 		logger:         logger,
 		siteRegions:    make([]model.SiteRegionMapping, 0),
 		elasticConfig:  config.GetConfig().Elastic,
-	}
+	}, nil
 }
 
 func (s *kstarCollectorService) Run(credential *model.KStarCredential) error {
@@ -139,11 +140,16 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 		return
 	}
 
+	stationCount := 1
+	stationSize := len(plantListResp.Data)
 	for _, station := range plantListResp.Data {
 		stationID := station.GetID()
 		stationName := station.GetName()
 		plantNameInfo, _ := inverter.ParsePlantID(stationName)
 		cityName, cityCode, cityArea := inverter.ParseSiteID(s.siteRegions, plantNameInfo.SiteID)
+
+		s.logger.Infof("[%v] - Plant[%v/%v] - %v", credential.Username, stationCount, stationSize, stationName)
+		stationCount++
 
 		var plantStatus string
 		var currentPower float64
@@ -157,8 +163,13 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 			location = pointy.String(fmt.Sprintf("%f,%f", station.GetLatitude(), station.GetLongitude()))
 		}
 
+		deviceCount := 1
+		deviceSize := len(mapPlantIDToDeviceList[stationID])
 		for _, device := range mapPlantIDToDeviceList[stationID] {
 			deviceID := device.GetID()
+
+			s.logger.Infof("[%v] - Device[%v/%v] - %v", credential.Username, deviceCount, deviceSize, device.GetName())
+			deviceCount++
 
 			realtimeAlarmResp, err := client.GetRealtimeAlarmListOfDevice(deviceID)
 			if err != nil {
@@ -170,7 +181,12 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 			deviceStatus := device.Status
 			if len(realtimeAlarmResp.Data) > 0 {
 				deviceStatus = pointy.Int(2)
+				alarmCount := 1
+				alarmSize := len(realtimeAlarmResp.Data)
 				for _, alarm := range realtimeAlarmResp.Data {
+					s.logger.Infof("[%v] - Alarm[%v/%v] - %v", credential.Username, alarmCount, alarmSize, alarm.GetMessage())
+					alarmCount++
+
 					alarmItem := model.AlarmItem{
 						Timestamp:    now,
 						Month:        now.Format("01"),

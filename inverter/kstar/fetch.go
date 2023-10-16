@@ -2,6 +2,7 @@ package kstar
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -36,6 +37,7 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 	}
 
 	var res *http.Response
+	var result R
 	var err error
 	err = retry.Do(func() error {
 		res, err = client.Do(req)
@@ -48,42 +50,40 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 				return ErrorTooManyRequest
 			}
 		}
+		defer res.Body.Close()
+
+		// read a bytes of data
+		resBody, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+
+		// check empty response body
+		if len(resBody) == 0 {
+			return errors.New("empty body")
+		}
+
+		var response MetaResponse
+		if err := util.Recast(resBody, &response); err != nil {
+			return err
+		}
+
+		if response.Meta == nil {
+			return errors.New("meta is nil")
+		}
+
+		if !response.Meta.GetSuccess() {
+			return fmt.Errorf("response return unsuccessful with error code %q", response.Meta.GetCode())
+		}
+
+		if err := util.Recast(resBody, &result); err != nil {
+			return err
+		}
 
 		return nil
 	}, retryOptions...)
 
 	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	defer res.Body.Close()
-
-	// read a bytes of data
-	resBody, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	// check empty response body
-	if len(resBody) == 0 {
-		return nil, res.StatusCode, errors.New("empty body")
-	}
-
-	var result R
-	var response MetaResponse
-	if err := util.Recast(resBody, &response); err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	if response.Meta == nil {
-		return nil, http.StatusInternalServerError, errors.New("meta is nil")
-	}
-
-	if !response.Meta.GetSuccess() {
-		return nil, http.StatusInternalServerError, errors.New("response return success: false")
-	}
-
-	if err := util.Recast(resBody, &result); err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 
