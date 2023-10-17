@@ -66,7 +66,7 @@ func (h *DailyProductionHandler) Run() {
 	now := time.Now()
 	end := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	start := end.AddDate(0, 0, -1)
-	h.run(&start, &end)
+	h.run(&start, &end)()
 }
 
 func (h *DailyProductionHandler) run(start, end *time.Time) func() {

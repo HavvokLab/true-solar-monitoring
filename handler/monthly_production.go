@@ -70,7 +70,7 @@ func (h *MonthlyProductionHandler) Run() {
 	if now.Day() == 1 {
 		end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
 		start := end.AddDate(0, -1, 0)
-		h.run(&start, &end)
+		h.run(&start, &end)()
 	}
 }
 
