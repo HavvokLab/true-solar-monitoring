@@ -83,6 +83,7 @@ DONE:
 					Name:        plantItemDoc.Name,
 					Location:    plantItemDoc.Location,
 					PlantStatus: plantItemDoc.PlantStatus,
+					Owner:       credential.Owner,
 				}
 				siteDocuments = append(siteDocuments, siteItemDoc)
 			}
@@ -211,6 +212,7 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 						DeviceStatus: pointy.String(kstar.KSTAR_DEVICE_STATUS_ALARM),
 						ID:           nil,
 						Message:      alarm.Message,
+						Owner:        credential.Owner,
 					}
 
 					if alarm.SaveTime != nil {
@@ -245,6 +247,7 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 				SN:           device.SN,
 				Name:         device.Name,
 				DeviceType:   pointy.String(kstar.KSTAR_DEVICE_TYPE_INVERTER),
+				Owner:        credential.Owner,
 			}
 
 			deviceInfoResp, err := client.GetRealtimeDeviceData(deviceID)
@@ -329,6 +332,7 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 			MonthlyProduction: pointy.Float64(monthlyProduction),
 			YearlyProduction:  pointy.Float64(yearlyProduction),
 			PlantStatus:       pointy.String(plantStatus),
+			Owner:             credential.Owner,
 		}
 
 		if station.CreatedTime != nil {

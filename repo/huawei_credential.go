@@ -8,6 +8,7 @@ import (
 
 type HuaweiCredentialRepo interface {
 	GetCredentialsByOwner(constant.Owner) ([]model.HuaweiCredential, error)
+	GetCredentials() ([]model.HuaweiCredential, error)
 }
 
 type huaweiCredentialRepo struct {
@@ -22,6 +23,16 @@ func (r *huaweiCredentialRepo) GetCredentialsByOwner(owner constant.Owner) ([]mo
 	var credentials []model.HuaweiCredential
 	tx := r.db.Session(&gorm.Session{})
 	if err := tx.Find(&credentials, "owner = ?", owner).Error; err != nil {
+		return nil, err
+	}
+
+	return credentials, nil
+}
+
+func (r *huaweiCredentialRepo) GetCredentials() ([]model.HuaweiCredential, error) {
+	var credentials []model.HuaweiCredential
+	tx := r.db.Session(&gorm.Session{})
+	if err := tx.Find(&credentials).Error; err != nil {
 		return nil, err
 	}
 

@@ -41,7 +41,7 @@ func (h *HuaweiCollectorHandler) Run() {
 	}
 
 	credentialRepo := repo.NewHuaweiCredentialRepo(db)
-	credentials, err := credentialRepo.GetCredentialsByOwner(constant.TRUE_OWNER)
+	credentials, err := credentialRepo.GetCredentials()
 	if err != nil {
 		h.logger.Error(err)
 		return

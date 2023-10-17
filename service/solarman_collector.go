@@ -82,6 +82,7 @@ DONE:
 					Name:        plantItemDoc.Name,
 					Location:    plantItemDoc.Location,
 					PlantStatus: plantItemDoc.PlantStatus,
+					Owner:       credential.Owner,
 				}
 				siteDocuments = append(siteDocuments, siteItemDoc)
 			}
@@ -205,6 +206,7 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 					Longitude:         station.LocationLng,
 					LocationAddress:   station.LocationAddress,
 					InstalledCapacity: station.InstalledCapacity,
+					Owner:             credential.Owner,
 				}
 
 				var (
@@ -318,6 +320,7 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 						SN:           device.DeviceSN,
 						Name:         device.DeviceSN,
 						DeviceType:   device.DeviceType,
+						Owner:        credential.Owner,
 					}
 
 					if resp, err := client.GetDeviceRealtimeData(token, deviceSN); err == nil {
@@ -428,6 +431,7 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 										DeviceStatus: deviceItemDoc.Status,
 										ID:           pointy.String(strconv.Itoa(alert.GetAlertID())),
 										Message:      alert.AlertNameInPAAS,
+										Owner:        credential.Owner,
 									}
 
 									if alert.AlertTime != nil {

@@ -81,6 +81,7 @@ DONE:
 					Name:        plantItemDoc.Name,
 					Location:    plantItemDoc.Location,
 					PlantStatus: plantItemDoc.PlantStatus,
+					Owner:       credential.Owner,
 				}
 				siteDocuments = append(siteDocuments, siteItemDoc)
 			}
@@ -401,6 +402,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 						DeviceStatus: pointy.String(huawei.HUAWEI_STATUS_ALARM),
 						ID:           pointy.String(strconv.Itoa(deviceAlarm.GetAlarmID())),
 						Message:      deviceAlarm.AlarmName,
+						Owner:        credential.Owner,
 					}
 
 					if deviceAlarm.RaiseTime != nil {
@@ -434,6 +436,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 				SN:             device.SN,
 				Name:           device.Name,
 				LastUpdateTime: nil,
+				Owner:          credential.Owner,
 			}
 
 			if deviceStatus != nil {
@@ -521,6 +524,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 			MonthlyProduction: &monthlyProduction,
 			YearlyProduction:  pointy.Float64(mapPlantCodeToYearlyPower[stationCode]),
 			PlantStatus:       pointy.String(plantStatus),
+			Owner:             credential.Owner,
 		}
 
 		plantItem.TotalProduction = mapPlantCodeToRealtimeData[stationCode].DataItemMap.TotalPower

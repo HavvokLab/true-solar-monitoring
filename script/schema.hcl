@@ -25,6 +25,11 @@ table "tbl_solarman_credentials" {
     type = varchar(256)
   }
 
+  column "owner" {
+    type = varchar(32)
+    default = "TRUE"
+  }
+
   column "created_at" {
     null    = false
     type    = datetime
@@ -97,6 +102,11 @@ table "tbl_kstar_credentials" {
 
   column "password" {
     type = varchar(256)
+  }
+
+  column "owner" {
+    type = varchar(32)
+    default = "TRUE"
   }
 
   column "created_at" {

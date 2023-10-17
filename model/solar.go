@@ -34,6 +34,7 @@ type PlantItem struct {
 	MonthlyProduction *float64   `json:"monthly_production"`
 	YearlyProduction  *float64   `json:"yearly_production"`
 	PlantStatus       *string    `json:"plant_status"`
+	Owner             string     `json:"owner"`
 }
 
 type DeviceItem struct {
@@ -64,6 +65,7 @@ type DeviceItem struct {
 	MonthlyPowerGeneration *float64   `json:"monthly_power_generation"`
 	YearlyPowerGeneration  *float64   `json:"yearly_power_generation"`
 	LastUpdateTime         *time.Time `json:"last_update_time"`
+	Owner                  string     `json:"owner"`
 }
 
 type AlarmItem struct {
@@ -92,6 +94,7 @@ type AlarmItem struct {
 	ID           *string    `json:"id"`
 	Message      *string    `json:"message"`
 	AlarmTime    *time.Time `json:"alarm_time"`
+	Owner        string     `json:"owner"`
 }
 
 type SiteItem struct {
@@ -103,4 +106,5 @@ type SiteItem struct {
 	Name        *string   `json:"name"`
 	Location    *string   `json:"location"`
 	PlantStatus *string   `json:"plant_status"`
+	Owner       string    `json:"owner"`
 }

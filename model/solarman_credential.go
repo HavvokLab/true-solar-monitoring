@@ -10,6 +10,7 @@ type SolarmanCredential struct {
 	Password  string     `gorm:"column:password"`
 	AppSecret string     `gorm:"column:app_secret"`
 	AppID     string     `gorm:"column:app_id"`
+	Owner     string     `gorm:"column:owner"`
 	CreatedAt *time.Time `gorm:"column:created_at"`
 	UpdatedAt *time.Time `gorm:"column:updated_at"`
 }
