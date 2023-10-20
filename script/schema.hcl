@@ -252,3 +252,35 @@ table "tbl_site_region_mapping" {
     columns = [column.id]
   }
 }
+
+table "tbl_users" {
+  schema = schema.main
+  column "id" {
+    type = varchar(32)
+  }
+
+  column "username" {
+    type = varchar(64)
+  }
+
+  column "hashed_password" {
+    type = varchar(256)
+  }
+
+  column "created_at" {
+    null    = false
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  column "updated_at" {
+    null      = false
+    type      = datetime
+    default   = sql("CURRENT_TIMESTAMP")
+    on_update = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+}
