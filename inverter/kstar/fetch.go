@@ -72,6 +72,10 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 			return errors.New("meta is nil")
 		}
 
+		if response.Meta.GetCode() == "10004" {
+			return nil
+		}
+
 		if !response.Meta.GetSuccess() {
 			return fmt.Errorf("response return unsuccessful with error code %q", response.Meta.GetCode())
 		}

@@ -130,6 +130,12 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 		return
 	}
 
+	if deviceList == nil {
+		s.logger.Errorf("[%v] - Failed to get device list: empty data", credential.Username)
+		errorCh <- err
+		return
+	}
+
 	for _, device := range deviceList {
 		mapPlantIDToDeviceList[device.GetPlantID()] = append(mapPlantIDToDeviceList[device.GetPlantID()], *device)
 	}
@@ -137,6 +143,12 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 	plantListResp, err := client.GetPlantList()
 	if err != nil {
 		s.logger.Errorf("[%v] - Failed to get plant list: %v", credential.Username, err)
+		errorCh <- err
+		return
+	}
+
+	if plantListResp == nil {
+		s.logger.Errorf("[%v] - Failed to get plant list: empty data", credential.Username)
 		errorCh <- err
 		return
 	}
@@ -177,6 +189,11 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 				s.logger.Errorf("[%v] - Failed to get realtime alarm list of device: %v", credential.Username, err)
 				errorCh <- err
 				return
+			}
+
+			if realtimeAlarmResp == nil {
+				s.logger.Warnf("[%v] - Failed to get realtime alarm list of device: empty data", credential.Username)
+				continue
 			}
 
 			deviceStatus := device.Status
@@ -255,6 +272,11 @@ func (s *kstarCollectorService) run(credential *model.KStarCredential, documentC
 				s.logger.Errorf("[%v] - Failed to get realtime device data: %v", credential.Username, err)
 				errorCh <- err
 				return
+			}
+
+			if deviceInfoResp == nil {
+				s.logger.Warnf("[%v] - Failed to get realtime device data: empty data", credential.Username)
+				continue
 			}
 
 			if deviceInfoResp.Data != nil {

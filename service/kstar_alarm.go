@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -60,6 +61,11 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 		return err
 	}
 
+	if deviceList == nil {
+		s.logger.Errorf("[%v] - KStarAlarmService.Run(): deviceList is nil", credential.Username)
+		return errors.New("empty deviceList")
+	}
+
 	deviceCount := 1
 	deviceSize := len(deviceList)
 	for _, device := range deviceList {
@@ -76,6 +82,11 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 		if err != nil {
 			s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 			return err
+		}
+
+		if realtimeDeviceDataResp == nil {
+			s.logger.Warnf("[%v] - KStarAlarmService.Run(): realtimeDeviceDataResp is nil", credential.Username)
+			continue
 		}
 
 		if realtimeDeviceDataResp.Data != nil {
