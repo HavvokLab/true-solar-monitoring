@@ -6,6 +6,7 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
 	"github.com/HavvokLab/true-solar-monitoring/service"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 )
 
 type SumPerformanceAlarmHandler struct {
@@ -20,7 +21,7 @@ func NewSumPerformanceAlarmHandler() *SumPerformanceAlarmHandler {
 func (h *SumPerformanceAlarmHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.SUM_PERFORMANCE_ALARM_LOG_NAME,
+			LogName:     util.GetLogName(constant.SUM_PERFORMANCE_ALARM_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -67,7 +68,7 @@ func (h *SumPerformanceAlarmHandler) Run() {
 func (h *SumPerformanceAlarmHandler) Mock() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.SUM_PERFORMANCE_ALARM_LOG_NAME,
+			LogName:     util.GetLogName(constant.SUM_PERFORMANCE_ALARM_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,

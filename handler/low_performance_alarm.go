@@ -6,6 +6,7 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
 	"github.com/HavvokLab/true-solar-monitoring/service"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 )
 
 type LowPerformanceAlarmHandler struct {
@@ -19,7 +20,7 @@ func NewLowPerformanceAlarmHandler() *LowPerformanceAlarmHandler {
 func (h *LowPerformanceAlarmHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.LOW_PERFORMANCE_ALARM_LOG_NAME,
+			LogName:     util.GetLogName(constant.LOW_PERFORMANCE_ALARM_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -66,7 +67,7 @@ func (h *LowPerformanceAlarmHandler) Run() {
 func (h *LowPerformanceAlarmHandler) Mock() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.LOW_PERFORMANCE_ALARM_LOG_NAME,
+			LogName:     util.GetLogName(constant.LOW_PERFORMANCE_ALARM_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,

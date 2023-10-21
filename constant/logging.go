@@ -3,6 +3,7 @@ package constant
 const LOG_DIRECTORY = "logs"
 
 const (
+	API_LOG_NAME                     = "logs/api.log"
 	DAILY_PRODUCTION_LOG_NAME        = "daily_production"
 	MONTHLY_PRODUCTION_LOG_NAME      = "monthly_production"
 	SOLARMAN_COLLECTOR_LOG_NAME      = "solarman_collector"

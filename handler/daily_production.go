@@ -9,6 +9,7 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
 	"github.com/HavvokLab/true-solar-monitoring/service"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 	"github.com/gammazero/workerpool"
 )
 
@@ -23,7 +24,7 @@ func NewDailyProductionHandler() *DailyProductionHandler {
 func (h *DailyProductionHandler) RunAll() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.DAILY_PRODUCTION_LOG_NAME,
+			LogName:     util.GetLogName(constant.DAILY_PRODUCTION_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -52,7 +53,7 @@ func (h *DailyProductionHandler) RunAll() {
 func (h *DailyProductionHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.DAILY_PRODUCTION_LOG_NAME,
+			LogName:     util.GetLogName(constant.DAILY_PRODUCTION_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,

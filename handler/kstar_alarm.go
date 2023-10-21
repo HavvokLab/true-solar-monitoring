@@ -9,6 +9,7 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/model"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
 	"github.com/HavvokLab/true-solar-monitoring/service"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 	"github.com/gammazero/workerpool"
 )
 
@@ -23,7 +24,7 @@ func NewKStarAlarmHandler() *KStarAlarmHandler {
 func (h *KStarAlarmHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.KSTAR_ALARM_LOG_NAME,
+			LogName:     util.GetLogName(constant.KSTAR_ALARM_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -87,7 +88,7 @@ func (h *KStarAlarmHandler) run(credential *model.KStarCredential) func() {
 func (h *KStarAlarmHandler) Mock() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.KSTAR_ALARM_LOG_NAME,
+			LogName:     util.GetLogName(constant.KSTAR_ALARM_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,

@@ -3,7 +3,6 @@ package logger
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/go-playground/validator"
 	"go.uber.org/zap"
@@ -37,8 +36,8 @@ type LoggerOption struct {
 	LogName     string `validate:"required"`
 	SkipCaller  int    `validate:"required"`
 	LogSize     int    `validate:"required"`
-	LogAge      int    `validate:"required"`
-	LogBackup   int    `validate:"required"`
+	LogAge      int
+	LogBackup   int `validate:"required"`
 	LogCompress bool
 }
 
@@ -64,10 +63,8 @@ func NewLogger(option *LoggerOption) Logger {
 		return lvl >= zapcore.Level(option.LogLevel)
 	})
 
-	now := time.Now()
-	fileName := fmt.Sprintf("logs/%v/%v.log", option.LogName, now.Format("20060102"))
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   fileName,
+		Filename:   option.LogName,
 		MaxSize:    option.LogSize,
 		MaxBackups: option.LogBackup,
 		Compress:   option.LogCompress,

@@ -18,3 +18,13 @@ func NewGormDB(paths ...string) (*gorm.DB, error) {
 
 	return db, nil
 }
+
+var GormDB *gorm.DB
+
+func InitGormDB() {
+	var err error
+	GormDB, err = NewGormDB()
+	if err != nil {
+		panic(err)
+	}
+}

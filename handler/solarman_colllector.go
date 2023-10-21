@@ -9,6 +9,7 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/model"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
 	"github.com/HavvokLab/true-solar-monitoring/service"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 	"github.com/gammazero/workerpool"
 )
 
@@ -23,7 +24,7 @@ func NewSolarmanCollectorHandler() *SolarmanCollectorHandler {
 func (h *SolarmanCollectorHandler) Run() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.SOLARMAN_COLLECTOR_LOG_NAME,
+			LogName:     util.GetLogName(constant.SOLARMAN_COLLECTOR_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -90,7 +91,7 @@ func (h *SolarmanCollectorHandler) run(credential *model.SolarmanCredential) fun
 func (h *SolarmanCollectorHandler) Mock() {
 	h.logger = logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     constant.SOLARMAN_COLLECTOR_LOG_NAME,
+			LogName:     util.GetLogName(constant.SOLARMAN_COLLECTOR_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,

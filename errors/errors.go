@@ -5,7 +5,7 @@ type ServerError struct {
 	Message string `json:"msg"`
 }
 
-func (e *ServerError) Error() string {
+func (e ServerError) Error() string {
 	return e.Message
 }
 

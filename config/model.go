@@ -1,6 +1,7 @@
 package config
 
 type Config struct {
+	API                   APIConfig            `mapstructure:"api"`
 	Authentication        AuthenticationConfig `mapstructure:"authentication"`
 	Elastic               ElasticsearchConfig  `mapstructure:"elasticsearch"`
 	Redis                 RedisConfig          `mapstructure:"redis"`
@@ -51,4 +52,8 @@ type AlarmConfig struct {
 type AuthenticationConfig struct {
 	Secret  string `mapstructure:"secret"`
 	Expired int64  `mapstructure:"expired"`
+}
+
+type APIConfig struct {
+	Port string `mapstructure:"port"`
 }
