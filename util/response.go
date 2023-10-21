@@ -7,8 +7,8 @@ import (
 
 type ServerResponse struct {
 	Success bool        `json:"success"`
-	Message string      `json:"message"`
-	Result  interface{} `json:"result"`
+	Message string      `json:"message,omitempty"`
+	Result  interface{} `json:"result,omitempty"`
 }
 
 func NewResponse(c *fiber.Ctx, code int, success bool, message string, result interface{}) error {

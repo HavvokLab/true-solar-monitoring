@@ -51,3 +51,6 @@ kstar:
 
 kstar_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o kstar ./cmd/kstar/main.go
+
+register_build:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o register ./cmd/register/main.go

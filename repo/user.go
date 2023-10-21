@@ -7,6 +7,7 @@ import (
 )
 
 type UserRepo interface {
+	Create(*model.User) error
 	FindByUsername(username string) (*model.User, error)
 }
 
@@ -26,4 +27,13 @@ func (r *userRepo) FindByUsername(username string) (*model.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (r *userRepo) Create(user *model.User) error {
+	tx := r.db.Session(&gorm.Session{})
+	if err := tx.Create(user).Error; err != nil {
+		return util.TranslateSqliteError(err)
+	}
+
+	return nil
 }

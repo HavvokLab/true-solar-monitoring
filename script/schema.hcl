@@ -46,6 +46,11 @@ table "tbl_solarman_credentials" {
   primary_key {
     columns = [column.id]
   }
+
+  index "idx_solarman_username" {
+    columns = [column.username]
+    unique  = true
+  }
 }
 
 table "tbl_huawei_credentials" {
@@ -84,6 +89,11 @@ table "tbl_huawei_credentials" {
 
   primary_key {
     columns = [column.id]
+  }
+
+  index "idx_huawei_username" {
+    columns = [column.username]
+    unique  = true
   }
 }
 
@@ -124,6 +134,11 @@ table "tbl_kstar_credentials" {
 
   primary_key {
     columns = [column.id]
+  }
+
+  index "idx_kstar_username" {
+    columns = [column.username]
+    unique  = true
   }
 }
 
@@ -211,6 +226,11 @@ table "tbl_performance_alarm_config" {
   primary_key {
     columns = [column.id]
   }
+
+  index "idx_performance_alarm_name" {
+    columns = [column.name]
+    unique  = true
+  }
 }
 
 table "tbl_site_region_mapping" {
@@ -282,5 +302,10 @@ table "tbl_users" {
 
   primary_key {
     columns = [column.id]
+  }
+
+  index "idx_users_username" {
+    columns = [column.username]
+    unique  = true
   }
 }

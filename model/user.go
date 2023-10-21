@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/segmentio/ksuid"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -18,7 +19,7 @@ func (*User) TableName() string {
 	return "tbl_users"
 }
 
-func (u *User) BeforeCreate() error {
+func (u *User) BeforeCreate(*gorm.DB) error {
 	id := ksuid.New()
 	u.ID = id.String()
 	return nil

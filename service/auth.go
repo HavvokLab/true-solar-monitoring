@@ -16,6 +16,7 @@ import (
 
 type AuthService interface {
 	Login(*domain.LoginRequest) (*domain.LoginResponse, error)
+	Register(*domain.RegisterRequest) error
 }
 
 type authService struct {
@@ -67,4 +68,27 @@ func createAccessToken(user *model.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(conf.Secret))
+}
+
+func (s *authService) Register(req *domain.RegisterRequest) error {
+	if err := util.ValidateStruct(req); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+
+	hashed, err := util.GenerateHash(req.Password)
+	if err != nil {
+		s.logger.Error(err)
+		return err
+	}
+
+	user := new(model.User)
+	user.Username = req.Username
+	user.HashedPassword = hashed
+	if err := s.userRepo.Create(user); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+
+	return nil
 }

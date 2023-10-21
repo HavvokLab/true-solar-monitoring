@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/HavvokLab/true-solar-monitoring/errors"
+	"gorm.io/gorm"
 )
 
 var sqliteErrorCodes = map[int]error{
-	1555: errors.NewServerError(http.StatusBadRequest, "Duplicate entry"),
-	2067: errors.NewServerError(http.StatusBadRequest, "Duplicate entry"),
-	12:   errors.NewServerError(http.StatusNotFound, "Record not found"),
+	1555: errors.NewServerError(http.StatusBadRequest, "duplicate entry"),
+	2067: errors.NewServerError(http.StatusBadRequest, "duplicate entry"),
+	12:   errors.NewServerError(http.StatusNotFound, "record not found"),
 }
 
 type SqliteError struct {
@@ -20,6 +21,15 @@ type SqliteError struct {
 }
 
 func TranslateSqliteError(err error) error {
+	switch err {
+	case gorm.ErrRecordNotFound:
+		return errors.NewServerError(http.StatusNotFound, "record not found")
+	case gorm.ErrInvalidTransaction:
+		return errors.NewServerError(http.StatusInternalServerError, "invalid transaction")
+	case gorm.ErrDuplicatedKey:
+		return errors.NewServerError(http.StatusBadRequest, "record already exist")
+	}
+
 	parsedErr, marshalErr := json.Marshal(err)
 	if marshalErr != nil {
 		return err
