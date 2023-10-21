@@ -1,16 +1,17 @@
 package config
 
 type Config struct {
-	Elastic               ElasticsearchConfig `mapstructure:"elasticsearch"`
-	Redis                 RedisConfig         `mapstructure:"redis"`
-	Snmp                  SnmpConfig          `mapstructure:"snmp"`
-	CalculateProduction   AlarmConfig         `mapstructure:"calculate_production"`
-	LowPerformanceAlarm   AlarmConfig         `mapstructure:"low_performance_alarm"`
-	SumPerformanceAlarm   AlarmConfig         `mapstructure:"sum_performance_alarm"`
-	DailyPerformanceAlarm AlarmConfig         `mapstructure:"daily_performance_alarm"`
-	Solarman              InverterConfig      `mapstructure:"solarman"`
-	Huawei                InverterConfig      `mapstructure:"huawei"`
-	KStar                 InverterConfig      `mapstructure:"kstar"`
+	Authentication        AuthenticationConfig `mapstructure:"authentication"`
+	Elastic               ElasticsearchConfig  `mapstructure:"elasticsearch"`
+	Redis                 RedisConfig          `mapstructure:"redis"`
+	Snmp                  SnmpConfig           `mapstructure:"snmp"`
+	CalculateProduction   AlarmConfig          `mapstructure:"calculate_production"`
+	LowPerformanceAlarm   AlarmConfig          `mapstructure:"low_performance_alarm"`
+	SumPerformanceAlarm   AlarmConfig          `mapstructure:"sum_performance_alarm"`
+	DailyPerformanceAlarm AlarmConfig          `mapstructure:"daily_performance_alarm"`
+	Solarman              InverterConfig       `mapstructure:"solarman"`
+	Huawei                InverterConfig       `mapstructure:"huawei"`
+	KStar                 InverterConfig       `mapstructure:"kstar"`
 }
 
 type ElasticsearchConfig struct {
@@ -45,4 +46,9 @@ type InverterConfig struct {
 
 type AlarmConfig struct {
 	Crontab string `mapstructure:"crontab"`
+}
+
+type AuthenticationConfig struct {
+	Secret  string `mapstructure:"secret"`
+	Expired int64  `mapstructure:"expired"`
 }
