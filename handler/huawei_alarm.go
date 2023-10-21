@@ -42,7 +42,7 @@ func (h *HuaweiAlarmHandler) Run() {
 	}
 
 	credentialRepo := repo.NewHuaweiCredentialRepo(db)
-	credentials, err := credentialRepo.GetCredentialsByOwner(constant.TRUE_OWNER)
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return
@@ -106,7 +106,7 @@ func (h *HuaweiAlarmHandler) Mock() {
 	}
 
 	credentialRepo := repo.NewHuaweiCredentialRepo(db)
-	credentials, err := credentialRepo.GetCredentialsByOwner(constant.TRUE_OWNER)
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return
