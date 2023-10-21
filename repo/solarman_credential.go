@@ -2,11 +2,15 @@ package repo
 
 import (
 	"github.com/HavvokLab/true-solar-monitoring/model"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 	"gorm.io/gorm"
 )
 
 type SolarmanCredentialRepo interface {
-	GetCredentials() ([]model.SolarmanCredential, error)
+	FindAll() ([]model.SolarmanCredential, error)
+	Create(credential *model.SolarmanCredential) error
+	Update(id int64, credential *model.SolarmanCredential) error
+	Delete(id int64) error
 }
 
 type solarmanCredentialRepo struct {
@@ -17,7 +21,7 @@ func NewSolarmanCredentialRepo(db *gorm.DB) SolarmanCredentialRepo {
 	return &solarmanCredentialRepo{db: db}
 }
 
-func (r *solarmanCredentialRepo) GetCredentials() ([]model.SolarmanCredential, error) {
+func (r *solarmanCredentialRepo) FindAll() ([]model.SolarmanCredential, error) {
 	var credentials []model.SolarmanCredential
 	tx := r.db.Session(&gorm.Session{})
 	if err := tx.Find(&credentials).Error; err != nil {
@@ -25,4 +29,31 @@ func (r *solarmanCredentialRepo) GetCredentials() ([]model.SolarmanCredential, e
 	}
 
 	return credentials, nil
+}
+
+func (r *solarmanCredentialRepo) Create(credential *model.SolarmanCredential) error {
+	tx := r.db.Session(&gorm.Session{})
+	if err := tx.Create(credential).Error; err != nil {
+		return util.TranslateSqliteError(err)
+	}
+
+	return nil
+}
+
+func (r *solarmanCredentialRepo) Update(id int64, credential *model.SolarmanCredential) error {
+	tx := r.db.Session(&gorm.Session{})
+	if err := tx.Where("id = ?", id).Updates(credential).Error; err != nil {
+		return util.TranslateSqliteError(err)
+	}
+
+	return nil
+}
+
+func (r *solarmanCredentialRepo) Delete(id int64) error {
+	tx := r.db.Session(&gorm.Session{})
+	if err := tx.Where("id = ?", id).Delete(&model.SolarmanCredential{}).Error; err != nil {
+		return util.TranslateSqliteError(err)
+	}
+
+	return nil
 }

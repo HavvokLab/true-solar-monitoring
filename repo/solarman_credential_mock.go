@@ -8,7 +8,7 @@ func NewMockSolarmanCredentialRepo() SolarmanCredentialRepo {
 	return &mockSolarmanCredentialRepo{}
 }
 
-func (m *mockSolarmanCredentialRepo) GetCredentials() ([]model.SolarmanCredential, error) {
+func (m *mockSolarmanCredentialRepo) FindAll() ([]model.SolarmanCredential, error) {
 	return []model.SolarmanCredential{
 		{
 			ID:        1,
@@ -20,4 +20,16 @@ func (m *mockSolarmanCredentialRepo) GetCredentials() ([]model.SolarmanCredentia
 			UpdatedAt: nil,
 		},
 	}, nil
+}
+
+func (m *mockSolarmanCredentialRepo) Create(credential *model.SolarmanCredential) error {
+	return nil
+}
+
+func (m *mockSolarmanCredentialRepo) Update(id int64, credential *model.SolarmanCredential) error {
+	return nil
+}
+
+func (m *mockSolarmanCredentialRepo) Delete(id int64) error {
+	return nil
 }

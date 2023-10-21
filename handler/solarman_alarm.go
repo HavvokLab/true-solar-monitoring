@@ -42,7 +42,7 @@ func (h *SolarmanAlarmHandler) Run() {
 	}
 
 	credentialRepo := repo.NewSolarmanCredentialRepo(db)
-	credentials, err := credentialRepo.GetCredentials()
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return
@@ -99,7 +99,7 @@ func (h *SolarmanAlarmHandler) Mock() {
 	defer h.logger.Close()
 
 	credentialRepo := repo.NewMockSolarmanCredentialRepo()
-	credentials, err := credentialRepo.GetCredentials()
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return
