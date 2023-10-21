@@ -8,7 +8,7 @@ func NewMockKStarCredentialRepo() KStarCredentialRepo {
 	return &mockKStarCredentialRepo{}
 }
 
-func (*mockKStarCredentialRepo) GetCredentials() ([]model.KStarCredential, error) {
+func (*mockKStarCredentialRepo) FindAll() ([]model.KStarCredential, error) {
 	return []model.KStarCredential{
 		{
 			ID:       0,
@@ -16,4 +16,16 @@ func (*mockKStarCredentialRepo) GetCredentials() ([]model.KStarCredential, error
 			Password: "Truec[8mugiup18",
 		},
 	}, nil
+}
+
+func (*mockKStarCredentialRepo) Create(credential *model.KStarCredential) error {
+	return nil
+}
+
+func (*mockKStarCredentialRepo) Update(id int64, credential *model.KStarCredential) error {
+	return nil
+}
+
+func (*mockKStarCredentialRepo) Delete(id int64) error {
+	return nil
 }

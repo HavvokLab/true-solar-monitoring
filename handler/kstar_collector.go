@@ -42,7 +42,7 @@ func (h *KStarCollectorHandler) Run() {
 	}
 
 	credentialRepo := repo.NewKStarCredentialRepo(db)
-	credentials, err := credentialRepo.GetCredentials()
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return
@@ -100,7 +100,7 @@ func (h *KStarCollectorHandler) Mock() {
 	)
 	defer h.logger.Close()
 	credentialRepo := repo.NewMockKStarCredentialRepo()
-	credentials, err := credentialRepo.GetCredentials()
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return

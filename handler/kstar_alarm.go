@@ -42,7 +42,7 @@ func (h *KStarAlarmHandler) Run() {
 	}
 
 	credentialRepo := repo.NewKStarCredentialRepo(db)
-	credentials, err := credentialRepo.GetCredentials()
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return
@@ -106,7 +106,7 @@ func (h *KStarAlarmHandler) Mock() {
 	}
 
 	credentialRepo := repo.NewKStarCredentialRepo(db)
-	credentials, err := credentialRepo.GetCredentials()
+	credentials, err := credentialRepo.FindAll()
 	if err != nil {
 		h.logger.Error(err)
 		return
