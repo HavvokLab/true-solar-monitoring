@@ -201,7 +201,7 @@ func (s *sumPerformanceAlarmService) getConfig() (*model.PerformanceAlarmConfig,
 }
 
 func (s *sumPerformanceAlarmService) getInstalledCapacity() (*model.InstalledCapacity, error) {
-	installedCapacity, err := s.installedCapacityRepo.GetInstalledCapacity()
+	installedCapacity, err := s.installedCapacityRepo.FindOne()
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err

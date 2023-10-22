@@ -199,7 +199,7 @@ func (s *lowPerformanceAlarmService) getConfig() (*model.PerformanceAlarmConfig,
 }
 
 func (s *lowPerformanceAlarmService) getInstalledCapacity() (*model.InstalledCapacity, error) {
-	installedCapacity, err := s.installedCapacityRepo.GetInstalledCapacity()
+	installedCapacity, err := s.installedCapacityRepo.FindOne()
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err

@@ -33,4 +33,7 @@ func InitAPI(app *fiber.App) {
 
 	// |=> Kibana API
 	bindPrivateKibanaAPI(api)
+
+	// |=> Installed Capacity API
+	bindPrivateInstalledCapacityAPI(api)
 }
