@@ -36,4 +36,7 @@ func InitAPI(app *fiber.App) {
 
 	// |=> Installed Capacity API
 	bindPrivateInstalledCapacityAPI(api)
+
+	// |=> Performance Alarm API
+	bindPrivatePerformanceAlarmConfigAPI(api)
 }

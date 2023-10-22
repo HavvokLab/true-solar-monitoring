@@ -9,8 +9,8 @@ type PerformanceAlarmConfig struct {
 	HitDay     *int       `gorm:"column:hit_day" json:"hit_day"`
 	Percentage float64    `gorm:"column:percentage" json:"percentage"`
 	Duration   *int       `gorm:"column:duration" json:"duration"`
-	CreatedAt  *time.Time `gorm:"created_at"`
-	UpdatedAt  *time.Time `gorm:"updated_at"`
+	CreatedAt  *time.Time `gorm:"created_at" json:"created_at"`
+	UpdatedAt  *time.Time `gorm:"updated_at" json:"updated_at"`
 }
 
 func (*PerformanceAlarmConfig) TableName() string {
