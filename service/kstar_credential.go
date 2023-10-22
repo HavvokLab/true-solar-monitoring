@@ -8,7 +8,12 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/util"
 )
 
-type KStarCredentialService interface{}
+type KStarCredentialService interface {
+	FindAll(utx *domain.UserContext) ([]model.KStarCredential, error)
+	Create(utx *domain.UserContext, request *domain.CreateKStarCredentialRequest) error
+	Update(utx *domain.UserContext, id int64, request *domain.UpdateKStarCredentialRequest) error
+	Delete(utx *domain.UserContext, id int64) error
+}
 
 type kstarCredentialService struct {
 	repo   repo.KStarCredentialRepo
@@ -22,7 +27,7 @@ func NewKStarCredentialService(repo repo.KStarCredentialRepo, logger logger.Logg
 	}
 }
 
-func (s *kstarCredentialService) FindAll() ([]model.KStarCredential, error) {
+func (s *kstarCredentialService) FindAll(utx *domain.UserContext) ([]model.KStarCredential, error) {
 	result, err := s.repo.FindAll()
 	if err != nil {
 		s.logger.Error(err)
@@ -32,7 +37,7 @@ func (s *kstarCredentialService) FindAll() ([]model.KStarCredential, error) {
 	return result, nil
 }
 
-func (s *kstarCredentialService) Create(request *domain.CreateKStarCredentialRequest) error {
+func (s *kstarCredentialService) Create(utx *domain.UserContext, request *domain.CreateKStarCredentialRequest) error {
 	if err := util.ValidateStruct(request); err != nil {
 		return err
 	}
@@ -50,7 +55,7 @@ func (s *kstarCredentialService) Create(request *domain.CreateKStarCredentialReq
 	return nil
 }
 
-func (s *kstarCredentialService) Update(id int64, request *domain.UpdateKStarCredentialRequest) error {
+func (s *kstarCredentialService) Update(utx *domain.UserContext, id int64, request *domain.UpdateKStarCredentialRequest) error {
 	if err := util.ValidateStruct(request); err != nil {
 		return err
 	}
@@ -68,7 +73,7 @@ func (s *kstarCredentialService) Update(id int64, request *domain.UpdateKStarCre
 	return nil
 }
 
-func (s *kstarCredentialService) Delete(id int64) error {
+func (s *kstarCredentialService) Delete(utx *domain.UserContext, id int64) error {
 	if err := s.repo.Delete(id); err != nil {
 		s.logger.Error(err)
 		return err

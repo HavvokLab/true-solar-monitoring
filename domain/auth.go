@@ -2,6 +2,11 @@ package domain
 
 import "github.com/golang-jwt/jwt/v5"
 
+type UserContext struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"display_name"`
+}
+
 type LoginRequest struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`

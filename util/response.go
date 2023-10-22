@@ -32,6 +32,10 @@ func ResponseBadRequest(c *fiber.Ctx) error {
 	return NewResponse(c, fiber.StatusBadRequest, false, "bad request", nil)
 }
 
+func ResponseUnauthorized(c *fiber.Ctx) error {
+	return NewResponse(c, fiber.StatusUnauthorized, false, "unauthorized", nil)
+}
+
 func ResponseError(c *fiber.Ctx, err error) error {
 	switch e := err.(type) {
 	case errors.ServerError:

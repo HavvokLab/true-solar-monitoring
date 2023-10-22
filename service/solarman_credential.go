@@ -9,10 +9,10 @@ import (
 )
 
 type SolarmanCredentialService interface {
-	FindAll() ([]model.SolarmanCredential, error)
-	Create(request *domain.CreateSolarmanCredentialRequest) error
-	Update(id int64, request *domain.UpdateSolarmanCredentialRequest) error
-	Delete(id int64) error
+	FindAll(utx *domain.UserContext) ([]model.SolarmanCredential, error)
+	Create(utx *domain.UserContext, request *domain.CreateSolarmanCredentialRequest) error
+	Update(utx *domain.UserContext, id int64, request *domain.UpdateSolarmanCredentialRequest) error
+	Delete(utx *domain.UserContext, id int64) error
 }
 
 type solarmanCredentialService struct {
@@ -27,7 +27,7 @@ func NewSolarmanCredentialService(repo repo.SolarmanCredentialRepo, logger logge
 	}
 }
 
-func (s *solarmanCredentialService) FindAll() ([]model.SolarmanCredential, error) {
+func (s *solarmanCredentialService) FindAll(utx *domain.UserContext) ([]model.SolarmanCredential, error) {
 	result, err := s.repo.FindAll()
 	if err != nil {
 		s.logger.Error(err)
@@ -37,7 +37,7 @@ func (s *solarmanCredentialService) FindAll() ([]model.SolarmanCredential, error
 	return result, nil
 }
 
-func (s *solarmanCredentialService) Create(request *domain.CreateSolarmanCredentialRequest) error {
+func (s *solarmanCredentialService) Create(utx *domain.UserContext, request *domain.CreateSolarmanCredentialRequest) error {
 	if err := util.ValidateStruct(request); err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (s *solarmanCredentialService) Create(request *domain.CreateSolarmanCredent
 	return nil
 }
 
-func (s *solarmanCredentialService) Update(id int64, request *domain.UpdateSolarmanCredentialRequest) error {
+func (s *solarmanCredentialService) Update(utx *domain.UserContext, id int64, request *domain.UpdateSolarmanCredentialRequest) error {
 	if err := util.ValidateStruct(request); err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (s *solarmanCredentialService) Update(id int64, request *domain.UpdateSolar
 	return nil
 }
 
-func (s *solarmanCredentialService) Delete(id int64) error {
+func (s *solarmanCredentialService) Delete(utx *domain.UserContext, id int64) error {
 	if err := s.repo.Delete(id); err != nil {
 		s.logger.Error(err)
 		return err

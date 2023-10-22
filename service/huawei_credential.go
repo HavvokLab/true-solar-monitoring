@@ -9,10 +9,10 @@ import (
 )
 
 type HuaweiCredentialService interface {
-	FindAll() ([]model.HuaweiCredential, error)
-	Create(request *domain.CreateHuaweiCredentialRequest) error
-	Update(id int64, request *domain.UpdateHuaweiCredentialRequest) error
-	Delete(id int64) error
+	FindAll(utx *domain.UserContext) ([]model.HuaweiCredential, error)
+	Create(utx *domain.UserContext, request *domain.CreateHuaweiCredentialRequest) error
+	Update(utx *domain.UserContext, id int64, request *domain.UpdateHuaweiCredentialRequest) error
+	Delete(utx *domain.UserContext, id int64) error
 }
 
 type huaweiCredentialService struct {
@@ -27,7 +27,7 @@ func NewHuaweiCredentialService(repo repo.HuaweiCredentialRepo, logger logger.Lo
 	}
 }
 
-func (s *huaweiCredentialService) FindAll() ([]model.HuaweiCredential, error) {
+func (s *huaweiCredentialService) FindAll(utx *domain.UserContext) ([]model.HuaweiCredential, error) {
 	result, err := s.repo.FindAll()
 	if err != nil {
 		s.logger.Error(err)
@@ -37,7 +37,7 @@ func (s *huaweiCredentialService) FindAll() ([]model.HuaweiCredential, error) {
 	return result, nil
 }
 
-func (s *huaweiCredentialService) Create(request *domain.CreateHuaweiCredentialRequest) error {
+func (s *huaweiCredentialService) Create(utx *domain.UserContext, request *domain.CreateHuaweiCredentialRequest) error {
 	if err := util.ValidateStruct(request); err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (s *huaweiCredentialService) Create(request *domain.CreateHuaweiCredentialR
 	return nil
 }
 
-func (s *huaweiCredentialService) Update(id int64, request *domain.UpdateHuaweiCredentialRequest) error {
+func (s *huaweiCredentialService) Update(utx *domain.UserContext, id int64, request *domain.UpdateHuaweiCredentialRequest) error {
 	if err := util.ValidateStruct(request); err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (s *huaweiCredentialService) Update(id int64, request *domain.UpdateHuaweiC
 	return nil
 }
 
-func (s *huaweiCredentialService) Delete(id int64) error {
+func (s *huaweiCredentialService) Delete(utx *domain.UserContext, id int64) error {
 	if err := s.repo.Delete(id); err != nil {
 		s.logger.Error(err)
 		return err
