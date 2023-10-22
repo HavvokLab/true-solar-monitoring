@@ -10,13 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-/*
-GET    | /solarman
-POST   | /solarman
-PUT    | /solarman
-DELETE | /solarman
-*/
-
 func bindPrivateSolarmanAPI(router fiber.Router) {
 	credentialRepo := repo.NewSolarmanCredentialRepo(infra.GormDB)
 	credentialServ := service.NewSolarmanCredentialService(credentialRepo, logger.GetLogger())

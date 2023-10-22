@@ -9,10 +9,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-/*TODO:
-POST | /auth/login
-*/
-
 func bindPublicAuthRouter(router fiber.Router) {
 	userRepo := repo.NewUserRepo(infra.GormDB)
 	authServ := service.NewAuthService(userRepo, logger.GetLogger())
