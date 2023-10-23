@@ -17,6 +17,9 @@ func InitAPI(app *fiber.App) {
 	// |=> API GROUP <=|
 	api := app.Group("/api")
 
+	// |=> Health
+	bindPublicHealthAPI(api)
+
 	// |=> Authentication
 	bindPublicAuthRouter(api)
 
