@@ -16,6 +16,7 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d
 	github.com/gofiber/fiber/v2 v2.50.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/google/uuid v1.3.1
 	github.com/gosnmp/gosnmp v1.36.1
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/segmentio/ksuid v1.0.4
@@ -39,7 +40,6 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gammazero/deque v0.2.0 // indirect
-	github.com/google/uuid v1.3.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

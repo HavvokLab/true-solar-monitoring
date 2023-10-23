@@ -9,7 +9,7 @@ import (
 type SiteRegionMappingRepo interface {
 	Count() (int64, error)
 	GetSiteRegionMappings() ([]model.SiteRegionMapping, error)
-	GetSiteRegionMappingsWithPagination(limit, offset int) ([]model.SiteRegionMapping, int64, error)
+	GetSiteRegionMappingsWithPagination(limit, offset int) ([]model.SiteRegionMapping, error)
 	GetAreaNotNull() ([]model.SiteRegionMapping, error)
 	CreateCity(data *model.SiteRegionMapping) error
 	UpdateCity(id int64, data *model.SiteRegionMapping) error
@@ -48,20 +48,15 @@ func (r *siteRegionMappingRepo) GetSiteRegionMappings() ([]model.SiteRegionMappi
 	return siteRegionMappings, nil
 }
 
-func (r *siteRegionMappingRepo) GetSiteRegionMappingsWithPagination(limit, offset int) ([]model.SiteRegionMapping, int64, error) {
-	count, err := r.Count()
-	if err != nil {
-		return nil, 0, err
-	}
-
+func (r *siteRegionMappingRepo) GetSiteRegionMappingsWithPagination(limit, offset int) ([]model.SiteRegionMapping, error) {
 	var siteRegionMappings []model.SiteRegionMapping
 	tx := r.db.Session(&gorm.Session{})
-	err = tx.Find(&siteRegionMappings, "code NOT LIKE 'EMPTY-%'").Limit(limit).Offset(offset).Error
+	err := tx.Find(&siteRegionMappings, "code NOT LIKE 'EMPTY-%'").Limit(limit).Offset(offset).Error
 	if err != nil {
-		return nil, 0, util.TranslateSqliteError(err)
+		return nil, util.TranslateSqliteError(err)
 	}
 
-	return siteRegionMappings, count, nil
+	return siteRegionMappings, nil
 }
 
 func (r *siteRegionMappingRepo) GetAreaNotNull() ([]model.SiteRegionMapping, error) {

@@ -16,3 +16,12 @@ type SiteRegionMapping struct {
 func (*SiteRegionMapping) TableName() string {
 	return "tbl_site_region_mapping"
 }
+
+type Regions struct {
+	Regions []AreaWithCity `json:"regions"`
+}
+
+type AreaWithCity struct {
+	Area   string              `json:"area"`
+	Cities []SiteRegionMapping `json:"cities"`
+}
