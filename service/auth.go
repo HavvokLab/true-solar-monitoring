@@ -48,7 +48,7 @@ func (s *authService) Login(req *domain.LoginRequest) (*domain.LoginResponse, er
 		return nil, err
 	}
 
-	accessToken, err := createAccessToken(user)
+	accessToken, expired, err := createAccessToken(user)
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err
@@ -56,10 +56,11 @@ func (s *authService) Login(req *domain.LoginRequest) (*domain.LoginResponse, er
 
 	return &domain.LoginResponse{
 		AccessToken: accessToken,
+		ExpiredAt:   expired,
 	}, nil
 }
 
-func createAccessToken(user *model.User) (string, error) {
+func createAccessToken(user *model.User) (string, *time.Time, error) {
 	conf := config.GetConfig().Authentication
 	claims := new(domain.AccessToken)
 	claims.ID = user.ID
@@ -67,7 +68,12 @@ func createAccessToken(user *model.User) (string, error) {
 	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(conf.Expired)))
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(conf.Secret))
+	signedToken, err := token.SignedString([]byte(conf.Secret))
+	if err != nil {
+		return "", nil, err
+	}
+
+	return signedToken, &claims.ExpiresAt.Time, nil
 }
 
 func (s *authService) Register(req *domain.RegisterRequest) error {

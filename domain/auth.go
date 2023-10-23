@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type UserContext struct {
 	ID          string `json:"id"`
@@ -13,7 +17,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+	AccessToken string     `json:"access_token"`
+	ExpiredAt   *time.Time `json:"expired_at"`
 }
 
 type AccessToken struct {
