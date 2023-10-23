@@ -15,6 +15,11 @@ import (
 type SiteRegionMappingService interface {
 	FindAll(limit, offset int) (*domain.FindAllSiteRegionMappingsResponse, error)
 	FindRegion() (*model.Regions, error)
+	CreateCity(req *domain.CreateCityRequest) error
+	UpdateRegion(req *domain.UpdateRegionRequest) error
+	UpdateCity(id int64, req *domain.UpdateCityRequest) error
+	DeleteCity(id int64) error
+	DeleteArea(area string) error
 }
 
 type siteRegionMappingService struct {
@@ -148,5 +153,44 @@ func (s *siteRegionMappingService) DeleteArea(area string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (s *siteRegionMappingService) UpdateCity(id int64, req *domain.UpdateCityRequest) error {
+	if err := util.ValidateStruct(req); err != nil {
+		return err
+	}
+
+	data := model.SiteRegionMapping{
+		ID:   id,
+		Code: req.Code,
+		Name: req.Name,
+		Area: req.Area,
+	}
+
+	err := s.siteRegionMappingRepo.UpdateCity(id, &data)
+	if err != nil {
+		s.logger.Error(err)
+		return err
+	}
+	return nil
+}
+
+func (s *siteRegionMappingService) CreateCity(req *domain.CreateCityRequest) error {
+	if err := util.ValidateStruct(req); err != nil {
+		return err
+	}
+
+	data := model.SiteRegionMapping{
+		Code: req.Code,
+		Name: req.Name,
+		Area: req.Area,
+	}
+
+	err := s.siteRegionMappingRepo.CreateCity(&data)
+	if err != nil {
+		s.logger.Error(err)
+		return err
+	}
 	return nil
 }

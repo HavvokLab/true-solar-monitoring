@@ -37,4 +37,7 @@ func InitAPI(app *fiber.App) {
 
 	// |=> Performance Alarm API
 	bindPrivatePerformanceAlarmConfigAPI(api)
+
+	// |=> Site Region Mapping API
+	bindPrivateSiteMappingRegionAPI(api)
 }

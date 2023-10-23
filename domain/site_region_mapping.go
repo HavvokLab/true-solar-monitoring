@@ -11,3 +11,15 @@ type UpdateRegionRequest struct {
 	Area   string   `json:"area"  validate:"required"`
 	Cities []string `json:"cities" validate:"required"`
 }
+
+type UpdateCityRequest struct {
+	Code string  `json:"code" validate:"required"`
+	Name string  `json:"city"  validate:"required"`
+	Area *string `json:"area,omitempty"`
+}
+
+type CreateCityRequest struct {
+	Code string  `json:"code" validate:"required"`
+	Name string  `json:"city"  validate:"required"`
+	Area *string `json:"area,omitempty"`
+}
