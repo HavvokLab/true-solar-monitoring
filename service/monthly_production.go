@@ -115,6 +115,7 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 		if val, ok := item.Aggregations.Max("long"); ok {
 			doc.SetLongitude(val.Value)
 		}
+		doc.SetLocation(doc.Latitude, doc.Longitude)
 
 		if val, ok := item.Aggregations.Max("installed_capacity"); ok {
 			doc.SetInstalledCapacity(val.Value)
@@ -174,6 +175,7 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 			ProductionToTarget: nil,
 			Criteria:           nil,
 		}
+		doc.SetLocation(doc.Latitude, doc.Longitude)
 		doc.ClearZeroValue()
 
 		count += 1

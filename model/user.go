@@ -12,7 +12,7 @@ type User struct {
 	Username       string     `gorm:"column:username" json:"username"`
 	HashedPassword string     `gorm:"column:hashed_password" json:"hashed_password"`
 	CreatedAt      *time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt      *time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt      *time.Time `gorm:"column:created_at" json:"updated_at"`
 }
 
 func (*User) TableName() string {
