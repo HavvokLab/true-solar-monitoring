@@ -261,7 +261,7 @@ func (p *lowPerformanceAlarmService) getSNMPPayload(alarmType int, alarmConfig m
 	plantName := pointy.StringValue(plantItem.Name, "")
 	alarmName := fmt.Sprintf("SolarCell-%s", strings.ReplaceAll(alarmConfig.Name, " ", ""))
 	alarmNameInDescription := util.AddSpace(alarmConfig.Name)
-	severity := constant.CRITICAL_SEVERITY
+	severity := constant.MAJOR_SEVERITY
 	duration := pointy.IntValue(alarmConfig.Duration, 0)
 	hitDay := pointy.IntValue(alarmConfig.HitDay, 0)
 	multipliedCapacity := capacity * capacityConfig.EfficiencyFactor * float64(capacityConfig.FocusHour)
