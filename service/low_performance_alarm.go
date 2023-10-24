@@ -143,12 +143,14 @@ func (s *lowPerformanceAlarmService) Run() error {
 								continue
 							}
 
-							if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, description, severity, now.Format(time.RFC3339Nano)); err != nil {
+							if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, description, constant.MAJOR_SEVERITY, now.Format(time.RFC3339Nano)); err != nil {
 								failedAlarmCount++
 								failedBatchAlarmCount++
 								s.logger.Error(err)
 								continue
 							}
+
+							s.logger.Infof("SendAlarmTrap: plantName: %s, alarmName: %s, description: %s, severity: %s", plantName, alarmName, description, severity)
 							alarmCount++
 							batchAlarmCount++
 						}
