@@ -143,7 +143,7 @@ func (s *lowPerformanceAlarmService) Run() error {
 								continue
 							}
 
-							if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, description, constant.MAJOR_SEVERITY, now.Format(time.RFC3339Nano)); err != nil {
+							if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, description, severity, now.Format(time.RFC3339Nano)); err != nil {
 								failedAlarmCount++
 								failedBatchAlarmCount++
 								s.logger.Error(err)
@@ -261,14 +261,13 @@ func (p *lowPerformanceAlarmService) getSNMPPayload(alarmType int, alarmConfig m
 	plantName := pointy.StringValue(plantItem.Name, "")
 	alarmName := fmt.Sprintf("SolarCell-%s", strings.ReplaceAll(alarmConfig.Name, " ", ""))
 	alarmNameInDescription := util.AddSpace(alarmConfig.Name)
-	severity := "5"
+	severity := constant.CRITICAL_SEVERITY
 	duration := pointy.IntValue(alarmConfig.Duration, 0)
 	hitDay := pointy.IntValue(alarmConfig.HitDay, 0)
 	multipliedCapacity := capacity * capacityConfig.EfficiencyFactor * float64(capacityConfig.FocusHour)
 
 	// PerformanceLow
 	if alarmType == constant.PERFORMANCE_ALARM_TYPE_PERFORMANCE_LOW {
-		severity := "3"
 		payload := fmt.Sprintf("%s, %s, Less than or equal %.2f%%, Expected Daily Production:%.2f KWH, Actual Production less than:%.2f KWH, Duration:%d days, Period:%s",
 			vendorName, alarmNameInDescription, alarmConfig.Percentage, multipliedCapacity, multipliedCapacity*(alarmConfig.Percentage/100.0), hitDay, period)
 		return plantName, alarmName, payload, severity, nil
