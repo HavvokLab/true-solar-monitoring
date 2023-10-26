@@ -1,6 +1,9 @@
 run:
 	go run ./cmd/api/main.go
 
+test:
+	go run ./cmd/test/main.go
+
 apply_schema:
 	atlas schema apply --url "sqlite://database.db" --to "file://script/schema.hcl"
 

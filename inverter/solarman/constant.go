@@ -7,7 +7,7 @@ import (
 
 var htmlTagsRegExp = regexp.MustCompile(`<\/?[a-z][\s\S]*>`)
 
-const BRAND = "solarman"
+const BRAND = "invt"
 
 const (
 	URL_VERSION1                  = "https://globalapi.solarmanpv.com"
