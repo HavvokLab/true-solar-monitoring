@@ -3559,7 +3559,7 @@ func (e *EnergyStorageMachineAlertData) GetStorageSN(defaultValue ...string) str
 	return pointy.StringValue(e.StorageSN, value)
 }
 
-type GetEnergyStorageMachineAlertListResposne struct {
+type GetEnergyStorageMachineAlertListResponse struct {
 	DefaultResponse
 	Data *EnergyStorageMachineAlertData `json:"data,omitempty"`
 }

@@ -11,13 +11,14 @@ var htmlTagsRegExp = regexp.MustCompile(`<\/?[a-z][\s\S]*>`)
 const BRAND = "growatt"
 
 const (
-	URL_VERSION1    = "https://openapi.growatt.com/v1"
-	AUTH_HEADER     = "Token"
-	MAX_PAGE_SIZE   = 100
-	WAIT_TIME       = 15 * time.Second
-	ERROR_WAIT_TIME = 5 * time.Minute
-	RETRY_WAIT_TIME = 5 * time.Minute
-	RETRY_ATTEMPT   = 3
+	URL_VERSION1      = "https://openapi.growatt.com/v1"
+	AUTH_HEADER       = "Token"
+	MAX_PAGE_SIZE     = 100
+	HALF_A_BATCH_SIZE = 50
+	WAIT_TIME         = 15 * time.Second
+	ERROR_WAIT_TIME   = 5 * time.Minute
+	RETRY_WAIT_TIME   = 5 * time.Minute
+	RETRY_ATTEMPT     = 3
 )
 
 const (
