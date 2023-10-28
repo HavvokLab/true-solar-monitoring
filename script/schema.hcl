@@ -1,5 +1,54 @@
 schema "main" {}
 
+table "tbl_growatt_credentials" {
+  schema = schema.main
+
+  column "id" {
+    null           = false
+    type           = integer
+    auto_increment = true
+  }
+
+  column "username" {
+    type = varchar(256)
+  }
+
+  column "password" {
+    type = varchar(256)
+  }
+
+  column "token" {
+    type = varchar(256)
+  }
+
+  column "owner" {
+    type = varchar(32)
+    default = "TRUE"
+  }
+
+  column "created_at" {
+    null    = false
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  column "updated_at" {
+    null      = false
+    type      = datetime
+    default   = sql("CURRENT_TIMESTAMP")
+    on_update = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_growatt_username" {
+    columns = [column.username]
+    unique  = true
+  }
+}
+
 table "tbl_solarman_credentials" {
   schema = schema.main
 

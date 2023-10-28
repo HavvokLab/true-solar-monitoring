@@ -61,6 +61,134 @@ type PlantItem struct {
 	LatitudeF    *interface{} `json:"latitude_f,omitempty"`
 }
 
+func (p *PlantItem) GetStatus(defaultValue ...int) int {
+	value := 0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.IntValue(p.Status, value)
+}
+
+func (p *PlantItem) GetLocale(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.Locale, value)
+}
+
+func (p *PlantItem) GetTotalEnergy(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.TotalEnergy, value)
+}
+
+func (p *PlantItem) GetOperator(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.Operator, value)
+}
+
+func (p *PlantItem) GetCountry(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.Country, value)
+}
+
+func (p *PlantItem) GetCity(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.City, value)
+}
+
+func (p *PlantItem) GetCurrentPower(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.CurrentPower, value)
+}
+
+func (p *PlantItem) GetCreateDate(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.CreateDate, value)
+}
+
+func (p *PlantItem) GetImageURL(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.ImageURL, value)
+}
+
+func (p *PlantItem) GetPlantID(defaultValue ...int) int {
+	value := 0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.IntValue(p.PlantID, value)
+}
+
+func (p *PlantItem) GetName(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.Name, value)
+}
+
+func (p *PlantItem) GetInstaller(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.Installer, value)
+}
+
+func (p *PlantItem) GetUserID(defaultValue ...int) int {
+	value := 0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.IntValue(p.UserID, value)
+}
+
+func (p *PlantItem) GetLongitude(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.Longitude, value)
+}
+
+func (p *PlantItem) GetLatitude(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.StringValue(p.Latitude, value)
+}
+
+func (p *PlantItem) GetPeakPower(defaultValue ...float64) float64 {
+	value := 0.0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+	return pointy.Float64Value(p.PeakPower, value)
+}
+
 type PlantData struct {
 	Plants []*PlantItem `json:"plants,omitempty"`
 	Count  *int         `json:"count,omitempty"`
@@ -1379,6 +1507,15 @@ func (d *DeviceItem) GetDeviceSN(defaultValue ...string) string {
 	}
 
 	return pointy.StringValue(d.DeviceSN, value)
+}
+
+func (d *DeviceItem) GetLastUpdateTime(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(d.LastUpdateTime, value)
 }
 
 func (d *DeviceItem) GetModel(defaultValue ...string) string {

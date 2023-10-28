@@ -14,6 +14,30 @@ import (
 type GrowattClient interface {
 	GetPlantList() ([]*PlantItem, error)
 	GetPlantListWithPagination(page, size int) (*GetPlantListResponse, error)
+	GetPlantOverviewInfo(plantID int) (*GetPlantOverviewInfoResponse, error)
+	GetPlantDataLoggerInfo(plantID int) (*GetPlantDataLoggerInfoResponse, error)
+	GetPlantDeviceList(plantID int) ([]*DeviceItem, error)
+	GetPlantDeviceListWithPagination(plantID, page, size int) (*GetPlantDeviceListResponse, error)
+	GetRealtimeDeviceData(deviceSN string) (*GetRealtimeDeviceDataResponse, error)
+	GetRealtimeDeviceBatchesData(deviceSNs []string) (*GetRealtimeDeviceBatchesDataResponse, error)
+	GetRealtimeDeviceBatchesDataWithPagination(deviceSNs []string, page int) (*GetRealtimeDeviceBatchesDataResponse, error)
+	GetInverterAlertList(deviceSN string) ([]*AlarmItem, error)
+	GetInverterAlertListWithPagination(deviceSN string, page, size int) (*GetInverterAlertListResponse, error)
+	GetEnergyStorageMachineAlertList(deviceSN string, timestamp int64) (*GetEnergyStorageMachineAlertListResponse, error)
+	GetMaxAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
+	GetMaxAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetMaxAlertListResponse, error)
+	GetMixAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
+	GetMixAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetMixAlertListResponse, error)
+	GetSpaAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
+	GetSpaAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetSpaAlertListResponse, error)
+	GetMinAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
+	GetMinAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetMinAlertListResponse, error)
+	GetPcsAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
+	GetPcsAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetPcsAlertListResponse, error)
+	GetHpsAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
+	GetHpsAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetHpsAlertListResponse, error)
+	GetPbdAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
+	GetPbdAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetPbdAlertListResponse, error)
 }
 
 type growattClient struct {
@@ -250,12 +274,11 @@ func (r *growattClient) GetRealtimeDeviceBatchesData(deviceSNs []string) (*GetRe
 	return &result, nil
 }
 
-func (r *growattClient) GetInverterAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetInverterAlertListResponse, error) {
+func (r *growattClient) GetInverterAlertListWithPagination(deviceSN string, page, size int) (*GetInverterAlertListResponse, error) {
 	queryMap := map[string]interface{}{
 		"device_sn": deviceSN,
 		"page":      page,
 		"perpage":   size,
-		"date":      time.Unix(timestamp, 0).Format("2006-01-02"),
 	}
 
 	query := BuildQueryParams(queryMap)
@@ -273,11 +296,11 @@ func (r *growattClient) GetInverterAlertListWithPagination(deviceSN string, time
 	return res, nil
 }
 
-func (r *growattClient) GetInverterAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error) {
+func (r *growattClient) GetInverterAlertList(deviceSN string) ([]*AlarmItem, error) {
 	alarms := make([]*AlarmItem, 0)
 	page := 1
 	for {
-		res, err := r.GetInverterAlertListWithPagination(deviceSN, timestamp, page, MAX_PAGE_SIZE)
+		res, err := r.GetInverterAlertListWithPagination(deviceSN, page, MAX_PAGE_SIZE)
 		if err != nil {
 			return nil, err
 		}
