@@ -110,3 +110,8 @@ func ParseGrowattErrorMessage(errorCode int) string {
 		return fmt.Sprintf("error code: %q", errorCode)
 	}
 }
+
+var (
+	GROWATT_EQUIP_TYPE_MAPPER      = []string{"", "Inverter", "Energy storage machine", "Other equipment", "MAX", "MIX", "SPA", "MIN", "PCS", "HPS", "PBD"}
+	GROWATT_INVERTER_STATUS_MAPPER = []string{"Disconnect", "Online", "Stanby", "Fault"}
+)
