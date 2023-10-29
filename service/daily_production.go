@@ -176,6 +176,7 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 			Criteria:           nil,
 		}
 		doc.SetLocation(doc.Latitude, doc.Longitude)
+		doc.SetCriteria(doc.ProductionToTarget)
 		doc.ClearZeroValue()
 
 		count += 1

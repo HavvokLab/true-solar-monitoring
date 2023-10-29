@@ -162,13 +162,13 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 	count = 0
 	size = len(masterSiteMap)
 	for _, site := range masterSiteMap {
-		doc := model.DailyProductionDocument{
+		doc := model.MonthlyProductionDocument{
 			Date:               start,
 			VendorType:         site.Vendor,
 			Area:               site.Area,
 			SiteName:           site.SiteName,
 			InstalledCapacity:  site.InstalledCapacity,
-			DailyProduction:    nil,
+			MonthlyProduction:  nil,
 			Latitude:           site.Latitude,
 			Longitude:          site.Longitude,
 			Target:             nil,
@@ -176,6 +176,7 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 			Criteria:           nil,
 		}
 		doc.SetLocation(doc.Latitude, doc.Longitude)
+		doc.SetCriteria(doc.ProductionToTarget)
 		doc.ClearZeroValue()
 
 		count += 1
