@@ -12,6 +12,7 @@ type Config struct {
 	DailyPerformanceAlarm AlarmConfig          `mapstructure:"daily_performance_alarm"`
 	Solarman              InverterConfig       `mapstructure:"solarman"`
 	Huawei                InverterConfig       `mapstructure:"huawei"`
+	Growatt               InverterConfig       `mapstructure:"growatt"`
 	KStar                 InverterConfig       `mapstructure:"kstar"`
 }
 

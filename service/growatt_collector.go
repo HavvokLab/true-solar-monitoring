@@ -174,7 +174,12 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 		return
 	}
 
+	plantCount := 1
+	plantSize := len(plantList)
 	for _, station := range plantList {
+		s.logger.Infof("[%v] Processing plant %v/%v", credential.Username, plantCount, plantSize)
+		plantCount++
+
 		station := station
 		producer := func() {
 			stationID := station.GetPlantID()
@@ -306,12 +311,17 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 				return
 			}
 
+			deviceCount := 1
+			deviceSize := len(deviceList)
 			deviceStatusArray := make([]string, 0)
 			for _, device := range deviceList {
 				deviceSN := device.GetDeviceSN()
 				deviceID := device.GetDeviceID()
 				deviceTypeRaw := device.GetType()
 				deviceType := growatt.ParseGrowattDeviceType(deviceTypeRaw)
+
+				s.logger.Infof("[%v] Processing device %v/%v", credential.Username, deviceCount, deviceSize)
+				deviceCount++
 
 				deviceItem := model.DeviceItem{
 					Timestamp:    now,

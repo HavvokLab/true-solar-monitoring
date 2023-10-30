@@ -37,9 +37,6 @@ invt_build:
 invt_alarm_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o solarman_alarm ./cmd/solarman_alarm/main.go
 
-test:
-	go run ./cmd/api/main.go
-
 huawei:
 	go run ./cmd/huawei/main.go
 
@@ -60,3 +57,6 @@ register_build:
 
 alarm_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o alarm ./cmd/low_performance/main.go
+
+growatt:
+	go run ./cmd/growatt/main.go

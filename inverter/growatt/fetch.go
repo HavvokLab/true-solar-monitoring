@@ -55,33 +55,36 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 		client := &http.Client{}
 		res, err := client.Do(req)
 		if err != nil {
+			fmt.Printf("[ERROR] - %v: %#v", req.URL.String(), err)
 			return err
 		}
 		defer res.Body.Close()
 
 		if res.StatusCode == http.StatusTooManyRequests {
-			fmt.Println("Too many request")
+			fmt.Printf("[ERROR] - %v: too many request", req.URL.String())
 			return errors.New("too many request")
 		}
 
 		resBody, err := io.ReadAll(res.Body)
 		if err != nil {
+			fmt.Printf("[ERROR] - %v: %#v", req.URL.String(), err)
 			return err
 		}
 
 		if len(resBody) == 0 {
-			fmt.Println("empty body")
+			fmt.Printf("[ERROR] - %v: empty response", req.URL.String())
 			return errors.New("empty response")
 		}
 
 		if err := checkHTMLResponse(resBody); err != nil {
-			fmt.Println("HTML response")
+			fmt.Printf("[ERROR] - %v: html response", req.URL.String())
 			return err
 		}
 
 		if err := util.Recast(resBody, &result); err != nil {
 			errResp := ErrorResponse{}
 			if err := util.Recast(resBody, &errResp); err != nil {
+				fmt.Printf("[ERROR] - %v: %#v", req.URL.String(), err)
 				return err
 			}
 

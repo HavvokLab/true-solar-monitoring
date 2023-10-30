@@ -2,7 +2,6 @@ package growatt
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -94,7 +93,6 @@ func (r *growattClient) GetPlantList() ([]*PlantItem, error) {
 	plants := make([]*PlantItem, 0)
 	page := 1
 	for {
-		fmt.Println("start, ", page)
 		res, err := r.GetPlantListWithPagination(page, MAX_PAGE_SIZE)
 		if err != nil {
 			return nil, err
@@ -106,7 +104,6 @@ func (r *growattClient) GetPlantList() ([]*PlantItem, error) {
 			break
 		}
 
-		fmt.Println("done, ", page)
 		page += 1
 	}
 

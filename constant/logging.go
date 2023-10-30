@@ -13,6 +13,8 @@ const (
 	DAILY_PERFORMANCE_ALARM_LOG_NAME = "daily_performance_alarm"
 	HUAWEI_COLLECTOR_LOG_NAME        = "huawei_collector"
 	HUAWEI_ALARM_LOG_NAME            = "huawei_alarm"
+	GROWATT_COLLECTOR_LOG_NAME       = "growatt_collector"
+	GROWATT_ALARM_LOG_NAME           = "growatt_alarm"
 	KSTAR_COLLECTOR_LOG_NAME         = "kstar_collector"
 	KSTAR_ALARM_LOG_NAME             = "kstar_alarm"
 )
