@@ -28,25 +28,10 @@ func NewPlantService(repo repo.PlantRepo, logger logger.Logger) PlantService {
 }
 
 func (s *plantService) BulkCreate(plants []*model.Plant) error {
-	perBatch := 100
-	batches := make([][]*model.Plant, 0)
-	batch := make([]*model.Plant, 0)
-
-	for i, plant := range plants {
-		if (i+1)%perBatch == 0 {
-			batches = append(batches, batch)
-			batch = make([]*model.Plant, 0)
-		}
-
-		batch = append(batch, plant)
-	}
-	batches = append(batches, batch)
-
-	for _, batch := range batches {
-		if err := s.repo.BulkCreate(batch); err != nil {
-			s.logger.Error(err)
-			return err
-		}
+	err := s.repo.BatchCreate(plants)
+	if err != nil {
+		s.logger.Error(err)
+		return err
 	}
 
 	return nil
