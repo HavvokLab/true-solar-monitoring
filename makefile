@@ -63,3 +63,6 @@ growatt:
 
 growatt_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o growatt ./cmd/growatt/main.go
+
+growatt_alarm:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o growatt_alarm ./cmd/growatt_alarm/main.go
