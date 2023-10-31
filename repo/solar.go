@@ -558,3 +558,45 @@ func (r *solarRepo) GetSumPerformanceLow(duration int) ([]*elastic.AggregationBu
 
 	return items, err
 }
+
+func (r *solarRepo) GetUniquePlantByIndex() ([]*elastic.AggregationBucketKeyItem, error) {
+	ctx := context.Background()
+	termAggregation := elastic.NewTermsAggregation().
+		Field("name.keyword").
+		Size(10000)
+
+	termAggregation = termAggregation.
+		SubAggregation(
+			"data",
+			elastic.
+				NewTopHitsAggregation().
+				Size(1).
+				FetchSourceContext(
+					elastic.NewFetchSourceContext(true).
+						Include("name", "area", "vendor_type", "installed_capacity", "location", "owner"),
+				),
+		)
+
+	searchQuery := r.searchIndex().
+		Size(0).
+		Query(elastic.NewBoolQuery().Must(
+			elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
+		)).
+		Aggregation("plant", termAggregation)
+
+	firstResult, err := searchQuery.Pretty(true).Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if firstResult.Aggregations == nil {
+		return nil, errors.New("cannot get result aggregations")
+	}
+
+	plant, found := firstResult.Aggregations.Terms("plant")
+	if !found {
+		return nil, errors.New("cannot get result term plant")
+	}
+
+	return plant.Buckets, nil
+}

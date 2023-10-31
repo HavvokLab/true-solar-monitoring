@@ -393,3 +393,72 @@ table "tbl_kibana_credentials" {
     columns = [column.id]
   }
 }
+
+table "tbl_plants" {
+  schema = schema.main
+
+  column "id" {
+    null           = false
+    type           = integer
+    auto_increment = true
+  }
+
+  column "name" {
+    type = varchar(256)
+  }
+
+  column "area" {
+    type = varchar(256)
+    null = true
+  }
+
+  column "vendor_type" {
+    type = varchar(256)
+  }
+
+  column "installed_capacity" {
+    type = double
+  }
+
+  column "lat" {
+    type = double
+    null = true
+  }
+
+  column "long" {
+    type = double
+    null = true
+  }
+
+  column "owner" {
+    type = varchar(32)
+    null = true
+    default = "TRUE"
+  }
+
+  column "available" {
+    type = boolean
+  }
+
+  column "created_at" {
+    null    = false
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  column "updated_at" {
+    null      = false
+    type      = datetime
+    default   = sql("CURRENT_TIMESTAMP")
+    on_update = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_plant_name" {
+    columns = [column.name]
+    unique  = true
+  }
+}
