@@ -118,6 +118,7 @@ DONE:
 				Name:        plantItem.Name,
 				Location:    plantItem.Location,
 				PlantStatus: plantItem.PlantStatus,
+				Owner:       plantItem.Owner,
 			}
 
 			siteDocuments = append(siteDocuments, siteItem)
@@ -203,6 +204,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 				ID:           pointy.String(stationIDStr),
 				Name:         station.Name,
 				PlantStatus:  pointy.String(growatt.GROWATT_PLANT_STATUS_OFF),
+				Owner:        credential.Owner,
 			}
 
 			var electricPricePerKWh *float64
@@ -345,6 +347,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 					SN:           device.DeviceSN,
 					Name:         device.DeviceSN,
 					DeviceType:   &deviceType,
+					Owner:        credential.Owner,
 				}
 
 				if device.LastUpdateTime != nil {
@@ -400,6 +403,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
@@ -466,6 +470,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
@@ -529,6 +534,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
@@ -594,6 +600,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
@@ -660,6 +667,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
@@ -724,6 +732,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
@@ -787,6 +796,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
@@ -851,6 +861,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 													DeviceStatus: deviceItem.Status,
 													ID:           pointy.String(strconv.Itoa(pointy.IntValue(latestAlert.AlarmCode, 0))),
 													Message:      latestAlert.AlarmMessage,
+													Owner:        credential.Owner,
 												}
 
 												if latestAlert.StartTime != nil {
