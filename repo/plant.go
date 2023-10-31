@@ -7,6 +7,7 @@ import (
 )
 
 type PlantRepo interface {
+	FindAll() ([]*model.Plant, error)
 	Create(*model.Plant) error
 	BulkCreate([]*model.Plant) error
 }
@@ -45,4 +46,14 @@ func (r *plantRepo) BulkCreate(plants []*model.Plant) error {
 	}
 
 	return tx.Clauses(onConflict).Create(plants).Error
+}
+
+func (r *plantRepo) FindAll() ([]*model.Plant, error) {
+	tx := r.db.Session(&gorm.Session{})
+	var plants []*model.Plant
+	if err := tx.Find(&plants).Error; err != nil {
+		return nil, err
+	}
+
+	return plants, nil
 }
