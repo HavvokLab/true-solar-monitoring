@@ -21,6 +21,7 @@ type SolarRepo interface {
 	GetPerformanceLow(duration int, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error)
 	GetPerformanceByDate(date *time.Time, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error)
 	GetSumPerformanceLow(duration int) ([]*elastic.AggregationBucketCompositeItem, error)
+	GetUniquePlantByIndex(index string) ([]*elastic.AggregationBucketKeyItem, error)
 }
 
 type solarRepo struct {
@@ -559,7 +560,7 @@ func (r *solarRepo) GetSumPerformanceLow(duration int) ([]*elastic.AggregationBu
 	return items, err
 }
 
-func (r *solarRepo) GetUniquePlantByIndex() ([]*elastic.AggregationBucketKeyItem, error) {
+func (r *solarRepo) GetUniquePlantByIndex(index string) ([]*elastic.AggregationBucketKeyItem, error) {
 	ctx := context.Background()
 	termAggregation := elastic.NewTermsAggregation().
 		Field("name.keyword").
@@ -577,7 +578,7 @@ func (r *solarRepo) GetUniquePlantByIndex() ([]*elastic.AggregationBucketKeyItem
 				),
 		)
 
-	searchQuery := r.searchIndex().
+	searchQuery := r.elastic.Search(index).
 		Size(0).
 		Query(elastic.NewBoolQuery().Must(
 			elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
