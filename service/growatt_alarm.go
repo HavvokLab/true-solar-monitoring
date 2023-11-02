@@ -84,12 +84,12 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 					alarmName := fmt.Sprintf("Growatt,%s,%s", vals[1], deviceModel)
 					payload := fmt.Sprintf("%s-Error-%s", alarmName, vals[0])
 					severity := constant.CLEAR_SEVERITY
-					if err := s.snmpRepo.SendAlarmTrap(deviceName, alarmName, payload, severity, deviceLastUpdateTime); err != nil {
+					if err := s.snmpRepo.SendAlarmTrap(deviceName, payload, alarmName, severity, deviceLastUpdateTime); err != nil {
 						s.logger.Errorf("[%v] Failed to send alarm trap: %v", credential.Username, err)
 						continue
 					}
 
-					s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, deviceName, alarmName, payload, severity, deviceLastUpdateTime)
+					s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, deviceName, payload, alarmName, severity, deviceLastUpdateTime)
 				}
 
 				if err := s.redisClient.Del(ctx, key).Err(); err != nil {
@@ -108,12 +108,12 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 				alarmName := fmt.Sprintf("Growatt,Disconnect,%s", deviceModel)
 				payload := fmt.Sprintf("%s-Error-0", deviceType)
 				severity := "4"
-				if err := s.snmpRepo.SendAlarmTrap(deviceName, alarmName, payload, severity, deviceLastUpdateTime); err != nil {
-					s.logger.Errorf("snmp.SendAlarmTrap(%v,%v,%v,%v,%v): %v", deviceName, deviceType, payload, severity, deviceLastUpdateTime, err)
+				if err := s.snmpRepo.SendAlarmTrap(deviceName, payload, alarmName, severity, deviceLastUpdateTime); err != nil {
+					s.logger.Errorf("snmp.SendAlarmTrap(%v,%v,%v,%v,%v): %v", deviceName, payload, alarmName, severity, deviceLastUpdateTime, err)
 					continue
 				}
 
-				s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, deviceName, alarmName, payload, severity, deviceLastUpdateTime)
+				s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, deviceName, payload, alarmName, severity, deviceLastUpdateTime)
 			default:
 				date := now.AddDate(0, 0, -1).Format("2006-01-02")
 				alarms, err := client.GetInverterAlertList(deviceSN)
@@ -132,14 +132,14 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 					}
 
 					alarmName := fmt.Sprintf("Growatt,%s,%s", alarm.GetAlarmMessage(), deviceModel)
-					description := fmt.Sprintf("%s-Error-%d", deviceType, alarm.GetAlarmCode())
+					payload := fmt.Sprintf("%s-Error-%d", deviceType, alarm.GetAlarmCode())
 					severity := constant.MAJOR_SEVERITY
-					if err := s.snmpRepo.SendAlarmTrap(deviceName, alarmName, description, severity, date); err != nil {
+					if err := s.snmpRepo.SendAlarmTrap(deviceName, payload, alarmName, severity, date); err != nil {
 						s.logger.Errorf("[%v] Failed to send alarm trap: %v", credential.Username, err)
 						continue
 					}
 
-					s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, deviceName, alarmName, description, severity, date)
+					s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, deviceName, alarmName, payload, severity, date)
 				}
 			}
 		}
