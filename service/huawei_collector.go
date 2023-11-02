@@ -494,6 +494,11 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 			monthlyProduction = mapPlantCodeToMonthlyData[stationCode].DataItemMap.GetInverterPower()
 		}
 
+		var monthlyCO2 float64 = 0.0
+		if data, ok := mapPlantCodeToMonthlyData[stationCode]; ok {
+			monthlyCO2 = data.DataItemMap.GetReductionTotalCO2() * 1000
+		}
+
 		plantItem := model.PlantItem{
 			Timestamp:         now,
 			Month:             now.Format("01"),
@@ -516,7 +521,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 			CreatedDate:       nil,
 			InstalledCapacity: pointy.Float64(station.GetCapacity() * 1000),
 			TotalCO2:          pointy.Float64(mapPlantCodeToTotalCO2[stationCode] * 1000),
-			MonthlyCO2:        pointy.Float64(mapPlantCodeToMonthlyData[stationCode].DataItemMap.GetReductionTotalCO2() * 1000),
+			MonthlyCO2:        &monthlyCO2,
 			TotalSavingPrice:  mapPlantCodeToRealtimeData[stationCode].DataItemMap.TotalIncome,
 			Currency:          pointy.String(huawei.HUAWEI_CURRENCY_USD),
 			CurrentPower:      pointy.Float64(currentPower),
