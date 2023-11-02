@@ -21,10 +21,10 @@ func main() {
 	conf := config.GetConfig().Growatt
 	collector := handler.NewGrowattCollectorHandler()
 	alarm := handler.NewGrowattAlarmHandler()
+	_ = alarm
 
 	cron := gocron.NewScheduler(time.Local)
 	cron.Cron(conf.CollectorCrontab).Do(collector.Run)
 	cron.Cron(conf.NightCollectorCrontab).Do(collector.Run)
-	cron.Cron(conf.AlarmCrontab).Do(alarm.Run)
 	cron.StartBlocking()
 }
