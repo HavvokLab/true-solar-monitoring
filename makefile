@@ -66,3 +66,6 @@ growatt_build:
 
 plant_agg:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o plant_agg ./cmd/plant_aggregate/main.go
+
+update_owner_buid:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o update_owner ./cmd/update_owner/main.go
