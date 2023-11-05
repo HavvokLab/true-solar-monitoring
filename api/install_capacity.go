@@ -24,6 +24,6 @@ func bindPrivateInstalledCapacityAPI(router fiber.Router) {
 	sub := router.Group("/installed-capacity")
 	sub.Use(authMiddleware())
 	sub.Get("", authWrapper(hdl.FindOne))
-	sub.Put("/:id", authWrapper(hdl.Update))
+	sub.Put("", authWrapper(hdl.Update))
 
 }

@@ -30,12 +30,7 @@ func (h *InstalledCapacityHandler) Update(utx *domain.UserContext, c *fiber.Ctx)
 		return util.ResponseBadRequest(c)
 	}
 
-	id, err := c.ParamsInt("id")
-	if err != nil {
-		return util.ResponseBadRequest(c)
-	}
-
-	if err := h.serv.Update(utx, int64(id), &request); err != nil {
+	if err := h.serv.Update(utx, &request); err != nil {
 		return util.ResponseError(c, err)
 	}
 

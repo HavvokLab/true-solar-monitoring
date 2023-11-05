@@ -10,7 +10,7 @@ import (
 
 type InstalledCapacityService interface {
 	FindOne(*domain.UserContext) (*model.InstalledCapacity, error)
-	Update(*domain.UserContext, int64, *domain.UpdateInstalledCapacityRequest) error
+	Update(*domain.UserContext, *domain.UpdateInstalledCapacityRequest) error
 }
 
 type installedCapacityService struct {
@@ -32,7 +32,7 @@ func (s *installedCapacityService) FindOne(utx *domain.UserContext) (*model.Inst
 	return result, nil
 }
 
-func (s *installedCapacityService) Update(utx *domain.UserContext, id int64, request *domain.UpdateInstalledCapacityRequest) error {
+func (s *installedCapacityService) Update(utx *domain.UserContext, request *domain.UpdateInstalledCapacityRequest) error {
 	if err := util.ValidateStruct(request); err != nil {
 		s.logger.Error(err)
 		return err
@@ -42,7 +42,7 @@ func (s *installedCapacityService) Update(utx *domain.UserContext, id int64, req
 	installedCapacity.EfficiencyFactor = request.EfficiencyFactor
 	installedCapacity.FocusHour = request.FocusHour
 
-	if err := s.repo.Update(id, installedCapacity); err != nil {
+	if err := s.repo.Update(1, installedCapacity); err != nil {
 		s.logger.Error(err)
 		return err
 	}
