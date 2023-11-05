@@ -36,14 +36,14 @@ func (h *MonthlyProductionHandler) RunAll() {
 
 	pool := workerpool.New(5)
 	currentMonth := time.January
-	endDate := time.Now()
+	endMonth := time.Now().Month() - 1
 
 	for {
 		start := time.Date(2023, currentMonth, 1, 0, 0, 0, 0, time.Local)
 		end := time.Date(2023, currentMonth+1, 1, 0, 0, 0, 0, time.Local)
 
 		pool.Submit(h.run(&start, &end))
-		if endDate.Month() == currentMonth {
+		if endMonth == currentMonth {
 			break
 		} else {
 			currentMonth += 1
