@@ -22,6 +22,7 @@ type SolarRepo interface {
 	GetPerformanceByDate(date *time.Time, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error)
 	GetSumPerformanceLow(duration int) ([]*elastic.AggregationBucketCompositeItem, error)
 	GetUniquePlantByIndex(index string) ([]*elastic.AggregationBucketKeyItem, error)
+	UpdateOwnerToIndex(index, owner string) error
 }
 
 type solarRepo struct {
@@ -600,4 +601,16 @@ func (r *solarRepo) GetUniquePlantByIndex(index string) ([]*elastic.AggregationB
 	}
 
 	return plant.Buckets, nil
+}
+
+func (r *solarRepo) UpdateOwnerToIndex(index, owner string) error {
+	bodyFormat := `{
+		"script": {
+			"source": "ctx._source.owner = '%v'"
+		}
+	}`
+
+	body := fmt.Sprintf(bodyFormat, owner)
+	_, err := r.elastic.UpdateByQuery(index).Body(body).Do(context.Background())
+	return err
 }
