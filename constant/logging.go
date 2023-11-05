@@ -17,4 +17,5 @@ const (
 	GROWATT_ALARM_LOG_NAME           = "growatt_alarm"
 	KSTAR_COLLECTOR_LOG_NAME         = "kstar_collector"
 	KSTAR_ALARM_LOG_NAME             = "kstar_alarm"
+	PLANT_AGGR_LOG_NAME              = "plant_aggr"
 )

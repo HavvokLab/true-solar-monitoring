@@ -34,7 +34,7 @@ func NewPlantAggregateService(plantRepo repo.PlantRepo, solarRepo repo.SolarRepo
 }
 
 func (s *plantAggregateService) UpdatePlantByDate(date *time.Time) error {
-	index := fmt.Sprintf("%s-%s", config.GetConfig().Elastic.SolarIndex, date.Format("2006.01.*"))
+	index := fmt.Sprintf("%s-%s", config.GetConfig().Elastic.SolarIndex, date.Format("2006.01.02"))
 	data, err := s.solarRepo.GetUniquePlantByIndex(index)
 	if err != nil {
 		s.logger.Error(err)

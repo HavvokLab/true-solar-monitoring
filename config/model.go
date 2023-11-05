@@ -14,6 +14,7 @@ type Config struct {
 	Huawei                InverterConfig       `mapstructure:"huawei"`
 	Growatt               InverterConfig       `mapstructure:"growatt"`
 	KStar                 InverterConfig       `mapstructure:"kstar"`
+	PlantAggregate        PlantAggregateConfig `mapstructure:"plant_aggr"`
 }
 
 type ElasticsearchConfig struct {
@@ -47,6 +48,10 @@ type InverterConfig struct {
 }
 
 type AlarmConfig struct {
+	Crontab string `mapstructure:"crontab"`
+}
+
+type PlantAggregateConfig struct {
 	Crontab string `mapstructure:"crontab"`
 }
 
