@@ -9,6 +9,7 @@ type HuaweiCredential struct {
 	Username  string     `gorm:"column:username" json:"username"`
 	Password  string     `gorm:"column:password" json:"password"`
 	Owner     string     `gorm:"column:owner" json:"owner"`
+	Version   int        `gorm:"column:version" json:"version"`
 	CreatedAt *time.Time `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt *time.Time `gorm:"column:updated_at" json:"updated_at"`
 }

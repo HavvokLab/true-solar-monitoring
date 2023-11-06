@@ -212,6 +212,15 @@ type RealtimePlantData struct {
 	DataItemMap *RealtimePlantItem `json:"dataItemMap,omitempty"`
 }
 
+func (d *RealtimePlantData) GetCode(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(d.Code, value)
+}
+
 type RealtimePlantItem struct {
 	TotalIncome     *float64 `json:"total_income,omitempty"`
 	TotalPower      *float64 `json:"total_power,omitempty"`

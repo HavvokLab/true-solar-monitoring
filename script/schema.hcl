@@ -123,6 +123,14 @@ table "tbl_huawei_credentials" {
     type = varchar(256)
   }
 
+  column "version" {
+    type = integer
+    default = 1
+    check "unsigned version" {
+      expr = "version > 0"
+    }
+  }
+
   column "created_at" {
     null    = false
     type    = datetime
