@@ -36,7 +36,6 @@ table "tbl_growatt_credentials" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -89,7 +88,6 @@ table "tbl_solarman_credentials" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -126,9 +124,6 @@ table "tbl_huawei_credentials" {
   column "version" {
     type = integer
     default = 1
-    check "unsigned version" {
-      expr = "version > 0"
-    }
   }
 
   column "created_at" {
@@ -141,7 +136,6 @@ table "tbl_huawei_credentials" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -186,7 +180,6 @@ table "tbl_kstar_credentials" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -226,7 +219,6 @@ table "tbl_installed_capacity" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -277,7 +269,6 @@ table "tbl_performance_alarm_config" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -322,7 +313,6 @@ table "tbl_site_region_mapping" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -354,7 +344,6 @@ table "tbl_users" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -394,7 +383,6 @@ table "tbl_kibana_credentials" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
@@ -458,7 +446,6 @@ table "tbl_plants" {
     null      = false
     type      = datetime
     default   = sql("CURRENT_TIMESTAMP")
-    on_update = sql("CURRENT_TIMESTAMP")
   }
 
   primary_key {
