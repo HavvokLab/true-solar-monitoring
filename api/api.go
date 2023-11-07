@@ -32,6 +32,9 @@ func InitAPI(app *fiber.App) {
 	// |=> Solarman API
 	bindPrivateSolarmanAPI(api)
 
+	// |=> Growatt API
+	bindPrivateGrowattAPI(api)
+
 	// |=> Kibana API
 	bindPrivateKibanaAPI(api)
 
