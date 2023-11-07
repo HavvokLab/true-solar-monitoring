@@ -1,13 +1,18 @@
 package huawei
 
-import "time"
+import (
+	"regexp"
+	"time"
+)
+
+var htmlTagsRegExp = regexp.MustCompile(`<\/?[a-z][\s\S]*>`)
 
 const (
 	AUTH_HEADER         = "XSRF-TOKEN"
 	URL_VERSION2        = "https://sg5.fusionsolar.huawei.com"
 	HUAWEI_LANG_ENGLISH = "en_UK"
 	HUAWEI_CURRENCY_USD = "USD"
-	RETRY_WAIT_TIME     = 60 * time.Second
+	RETRY_WAIT_TIME     = 5 * time.Minute
 	RETRY_ATTEMPT       = 3
 	MAX_PAGE_SIZE       = 100
 )
