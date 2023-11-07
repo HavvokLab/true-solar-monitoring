@@ -29,8 +29,8 @@ type huaweiCollectorV2Service struct {
 	logger         logger.Logger
 }
 
-func NewHuaweiCollectorV2Service(solarRepo repo.SolarRepo, siteRegionRepo repo.SiteRegionMappingRepo, logger logger.Logger) HuaweiCollectorService {
-	return &huaweiCollectorService{
+func NewHuaweiCollectorV2Service(solarRepo repo.SolarRepo, siteRegionRepo repo.SiteRegionMappingRepo, logger logger.Logger) HuaweiCollectorV2Service {
+	return &huaweiCollectorV2Service{
 		vendorType:     strings.ToUpper(constant.VENDOR_TYPE_HUAWEI),
 		siteRegionRepo: siteRegionRepo,
 		solarRepo:      solarRepo,
