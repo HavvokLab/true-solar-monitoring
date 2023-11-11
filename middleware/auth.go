@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/domain"
@@ -37,9 +38,13 @@ func authMiddleware() func(*fiber.Ctx) error {
 			return util.ResponseUnauthorized(c)
 		}
 
+		tzOptions := jwt.WithTimeFunc(func() time.Time {
+			return time.Now()
+		})
+
 		token, err := jwt.ParseWithClaims(raw, &domain.AccessToken{}, func(t *jwt.Token) (interface{}, error) {
 			return []byte(conf.Secret), nil
-		})
+		}, tzOptions)
 
 		if err != nil {
 			fmt.Println("error parse token", err)
