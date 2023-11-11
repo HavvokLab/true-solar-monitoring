@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/HavvokLab/true-solar-monitoring/config"
@@ -24,16 +23,12 @@ func authMiddleware() func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		conf := config.GetConfig().Authentication
 		header := c.Get("Authorization")
-		fmt.Println(header)
 		if util.EmptyString(header) {
-			fmt.Println("empty header")
 			return util.ResponseUnauthorized(c)
 		}
 
 		raw := extractBearerToken(header)
-		fmt.Println(raw)
 		if util.EmptyString(raw) {
-			fmt.Println("empty raw")
 			return util.ResponseUnauthorized(c)
 		}
 
@@ -42,13 +37,11 @@ func authMiddleware() func(*fiber.Ctx) error {
 		})
 
 		if err != nil {
-			fmt.Println("error parse token", err)
 			return util.ResponseUnauthorized(c)
 		}
 
 		claims, ok := token.Claims.(*domain.AccessToken)
 		if !ok || !token.Valid {
-			fmt.Println("invalid token")
 			return util.ResponseUnauthorized(c)
 		}
 

@@ -2,7 +2,6 @@ package huawei
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -95,7 +94,6 @@ func (h *huaweiClient) GetToken(username, password string) (string, error) {
 		return nil
 	}, retryOptions...)
 
-	fmt.Println(token)
 	return token, nil
 }
 
