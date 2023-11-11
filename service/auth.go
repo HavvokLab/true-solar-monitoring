@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -62,10 +63,13 @@ func (s *authService) Login(req *domain.LoginRequest) (*domain.LoginResponse, er
 
 func createAccessToken(user *model.User) (string, *time.Time, error) {
 	conf := config.GetConfig().Authentication
+	expired := time.Now().Add(time.Second * time.Duration(conf.Expired))
+	fmt.Println(expired.Format(time.RFC3339))
+
 	claims := new(domain.AccessToken)
 	claims.ID = user.ID
 	claims.DisplayName = user.Username
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(conf.Expired)).UTC())
+	claims.ExpiresAt = jwt.NewNumericDate(expired)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString([]byte(conf.Secret))
