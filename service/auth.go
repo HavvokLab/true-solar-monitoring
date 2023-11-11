@@ -65,7 +65,7 @@ func createAccessToken(user *model.User) (string, *time.Time, error) {
 	claims := new(domain.AccessToken)
 	claims.ID = user.ID
 	claims.DisplayName = user.Username
-	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(conf.Expired)))
+	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(conf.Expired)).UTC())
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString([]byte(conf.Secret))
