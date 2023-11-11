@@ -31,6 +31,7 @@ func init() {
 func main() {
 	app := fiber.New()
 	app.Get("", func(c *fiber.Ctx) error { return c.SendStatus(200) })
+	app.Get("/metrics", func(c *fiber.Ctx) error { return c.SendStatus(200) })
 	api.InitAPI(app)
 
 	c := make(chan os.Signal, 1)
