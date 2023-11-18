@@ -51,7 +51,7 @@ func (r *siteRegionMappingRepo) GetSiteRegionMappings() ([]model.SiteRegionMappi
 func (r *siteRegionMappingRepo) GetSiteRegionMappingsWithPagination(limit, offset int) ([]model.SiteRegionMapping, error) {
 	var siteRegionMappings []model.SiteRegionMapping
 	tx := r.db.Session(&gorm.Session{})
-	err := tx.Find(&siteRegionMappings, "code NOT LIKE 'EMPTY-%'").Limit(limit).Offset(offset).Error
+	err := tx.Offset(offset).Limit(limit).Find(&siteRegionMappings, "code NOT LIKE 'EMPTY-%'").Error
 	if err != nil {
 		return nil, util.TranslateSqliteError(err)
 	}
