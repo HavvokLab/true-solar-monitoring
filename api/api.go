@@ -46,4 +46,7 @@ func InitAPI(app *fiber.App) {
 
 	// |=> Site Region Mapping API
 	bindPrivateSiteMappingRegionAPI(api)
+
+	// |=> Plant API
+	bindPrivatePlantAPI(api)
 }
