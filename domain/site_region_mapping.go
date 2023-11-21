@@ -14,7 +14,7 @@ type UpdateRegionRequest struct {
 
 type UpdateCityRequest struct {
 	Code string  `json:"code" validate:"required"`
-	Name string  `json:"city"  validate:"required"`
+	Name string  `json:"city"`
 	Area *string `json:"area,omitempty"`
 }
 

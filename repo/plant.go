@@ -8,6 +8,7 @@ import (
 
 type PlantRepo interface {
 	FindAll() ([]*model.Plant, error)
+	FindAllWithPagination(offset, limit int) ([]*model.Plant, error)
 	Create(*model.Plant) error
 	BatchCreate([]*model.Plant) error
 	BatchUpsertAvailable([]*model.Plant) error
@@ -57,6 +58,25 @@ func (r *plantRepo) FindAll() ([]*model.Plant, error) {
 	}
 
 	return plants, nil
+}
+
+func (r *plantRepo) FindAllWithPagination(offset, limit int) ([]*model.Plant, error) {
+	tx := r.db.Session(&gorm.Session{})
+	var plants []*model.Plant
+	if err := tx.Offset(offset).Limit(limit).Find(&plants).Error; err != nil {
+		return nil, err
+	}
+
+	return plants, nil
+}
+
+func (r *plantRepo) Delete(id int64) error {
+	tx := r.db.Session(&gorm.Session{})
+	if err := tx.Delete(&model.Plant{}, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *plantRepo) BatchUpsertAvailable(plants []*model.Plant) error {

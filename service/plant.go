@@ -13,6 +13,8 @@ import (
 type PlantService interface {
 	BulkCreate([]*model.Plant) error
 	ExportToCsv() error
+	FindAllWithPagination(offset, limit int) ([]*model.Plant, error)
+	Delete(id int64) error
 }
 
 type plantService struct {
@@ -68,5 +70,26 @@ func (s *plantService) ExportToCsv() error {
 		}
 	}
 
+	return nil
+}
+
+func (s *plantService) FindAllWithPagination(offset, limit int) ([]*model.Plant, error) {
+	if offset < 0 {
+		offset = 0
+	}
+
+	if limit < 1 {
+		limit = 12
+	}
+
+	plants, err := s.repo.FindAllWithPagination(offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return plants, nil
+}
+
+func (s *plantService) Delete(id int64) error {
 	return nil
 }
