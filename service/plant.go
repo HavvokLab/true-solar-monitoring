@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/HavvokLab/true-solar-monitoring/constant"
+	"github.com/HavvokLab/true-solar-monitoring/domain"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/model"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
@@ -13,7 +14,7 @@ import (
 type PlantService interface {
 	BulkCreate([]*model.Plant) error
 	ExportToCsv() error
-	FindAllWithPagination(offset, limit int) ([]*model.Plant, error)
+	FindAllWithPagination(offset, limit int) (*domain.FindAllPlantResponse, error)
 	Delete(id int64) error
 }
 
@@ -73,7 +74,7 @@ func (s *plantService) ExportToCsv() error {
 	return nil
 }
 
-func (s *plantService) FindAllWithPagination(offset, limit int) ([]*model.Plant, error) {
+func (s *plantService) FindAllWithPagination(offset, limit int) (*domain.FindAllPlantResponse, error) {
 	if offset < 0 {
 		offset = 0
 	}
@@ -87,9 +88,14 @@ func (s *plantService) FindAllWithPagination(offset, limit int) ([]*model.Plant,
 		return nil, err
 	}
 
-	return plants, nil
+	count, err := s.repo.Count()
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.FindAllPlantResponse{Plants: plants, Count: count}, nil
 }
 
 func (s *plantService) Delete(id int64) error {
-	return nil
+	return s.repo.Delete(id)
 }

@@ -12,6 +12,8 @@ type PlantRepo interface {
 	Create(*model.Plant) error
 	BatchCreate([]*model.Plant) error
 	BatchUpsertAvailable([]*model.Plant) error
+	Count() (int64, error)
+	Delete(id int64) error
 }
 
 type plantRepo struct {
@@ -48,6 +50,16 @@ func (r *plantRepo) BatchCreate(plants []*model.Plant) error {
 	}
 
 	return tx.Clauses(onConflict).CreateInBatches(plants, 100).Error
+}
+
+func (r *plantRepo) Count() (int64, error) {
+	tx := r.db.Session(&gorm.Session{})
+	var count int64
+	if err := tx.Model(&model.Plant{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 func (r *plantRepo) FindAll() ([]*model.Plant, error) {
