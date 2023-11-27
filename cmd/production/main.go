@@ -24,6 +24,6 @@ func main() {
 
 	cron := gocron.NewScheduler(time.Local)
 	cron.Cron(conf.Crontab).Do(daily.Run)
-	cron.Cron(conf.Crontab).Do(monthly.Run)
+	cron.Cron(conf.Crontab).Do(monthly.DailyRun)
 	cron.StartBlocking()
 }

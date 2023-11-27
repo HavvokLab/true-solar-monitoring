@@ -14,6 +14,7 @@ import (
 
 type MonthlyProductionService interface {
 	Run(start, end *time.Time) error
+	DailyRun() error
 }
 
 type monthlyProductionService struct {
@@ -28,6 +29,49 @@ func NewMonthlyProductionService(solarRepo repo.SolarRepo, masterSiteRepo repo.M
 		masterSiteRepo: masterSiteRepo,
 		logger:         logger,
 	}
+}
+
+func (s monthlyProductionService) DailyRun() error {
+	now := time.Now()
+	var end time.Time = now.AddDate(0, 0, -1)
+	var start time.Time = time.Date(end.Year(), end.Month(), 1, 0, 0, 0, 0, time.Local)
+
+	defer func() {
+		if r := recover(); r != nil {
+			s.logger.Warnf("[%v]MonthlyProduction.Run(): %v", end.Format(constant.YEAR_MONTH), r)
+		}
+	}()
+
+	documents, err := s.generateDocuments(&start, &end)
+	if err != nil {
+		s.logger.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), err)
+		return err
+	}
+	s.logger.Infof("[%v]MonthlyProduction.Run(): generated %v documents", start.Format(constant.YEAR_MONTH), len(documents))
+
+	if len(documents) == 0 {
+		s.logger.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), "documents is empty")
+		return nil
+	}
+
+	conf := config.GetConfig().Elastic
+	index := fmt.Sprintf("%v_%v", conf.MonthlyProductionIndex, start.Format("200601"))
+
+	if end.Day() > 1 {
+		if err := s.solarRepo.DeleteIndex(index); err != nil {
+			s.logger.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), err)
+			return err
+		}
+		s.logger.Infof("[%v]MonthlyProduction.Run(): index %q deleted", index)
+	}
+
+	if err := s.solarRepo.BulkIndex(index, documents); err != nil {
+		s.logger.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), err)
+		return err
+	}
+
+	s.logger.Infof("MonthlyProduction.Run(): bulked new index %q", index)
+	return nil
 }
 
 func (s monthlyProductionService) Run(start, end *time.Time) error {

@@ -35,12 +35,16 @@ func (h *MonthlyProductionHandler) RunAll() {
 	defer h.logger.Close()
 
 	pool := workerpool.New(5)
+	now := time.Now()
 	currentMonth := time.January
-	endMonth := time.Now().Month() - 1
+	endMonth := time.Now().Month()
 
 	for {
 		start := time.Date(2023, currentMonth, 1, 0, 0, 0, 0, time.Local)
 		end := time.Date(2023, currentMonth+1, 1, 0, 0, 0, 0, time.Local)
+		if now.Month() == currentMonth {
+			end = time.Date(2023, now.Month(), now.Day()+1, 0, 0, 0, 0, time.Local)
+		}
 
 		pool.Submit(h.run(&start, &end))
 		if endMonth == currentMonth {
@@ -92,6 +96,46 @@ func (h *MonthlyProductionHandler) run(start, end *time.Time) func() {
 		solarRepo := repo.NewSolarRepo(elastic)
 		serv := service.NewMonthlyProductionService(solarRepo, masterSiteRepo, h.logger)
 		if err := serv.Run(start, end); err != nil {
+			h.logger.Error(err)
+		}
+	}
+}
+
+func (h *MonthlyProductionHandler) DailyRun() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     util.GetLogName(constant.MONTHLY_PRODUCTION_LOG_NAME),
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
+	defer h.logger.Close()
+
+	h.dailyRun()()
+}
+
+func (h *MonthlyProductionHandler) dailyRun() func() {
+	return func() {
+		elastic, err := infra.NewElasticsearch()
+		now := time.Now()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", now.Format(constant.YEAR_MONTH))
+			return
+		}
+
+		masterSiteRepo, err := repo.NewMasterSiteRepo()
+		if err != nil {
+			h.logger.Error(err)
+			return
+		}
+
+		solarRepo := repo.NewSolarRepo(elastic)
+		serv := service.NewMonthlyProductionService(solarRepo, masterSiteRepo, h.logger)
+		if err := serv.DailyRun(); err != nil {
 			h.logger.Error(err)
 		}
 	}

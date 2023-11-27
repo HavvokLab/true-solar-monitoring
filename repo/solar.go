@@ -23,6 +23,7 @@ type SolarRepo interface {
 	GetSumPerformanceLow(duration int) ([]*elastic.AggregationBucketCompositeItem, error)
 	GetUniquePlantByIndex(index string) ([]*elastic.AggregationBucketKeyItem, error)
 	UpdateOwnerToIndex(index, owner string) error
+	DeleteIndex(index string) error
 }
 
 type solarRepo struct {
@@ -613,4 +614,17 @@ func (r *solarRepo) UpdateOwnerToIndex(index, owner string) error {
 	body := fmt.Sprintf(bodyFormat, owner)
 	_, err := r.elastic.UpdateByQuery(index).Body(body).Do(context.Background())
 	return err
+}
+
+func (r *solarRepo) DeleteIndex(index string) error {
+	deleteIndex, err := r.elastic.DeleteIndex(index).Do(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if !deleteIndex.Acknowledged {
+		return fmt.Errorf("[%v]index deletion not acknowledge", index)
+	}
+
+	return nil
 }
