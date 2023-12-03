@@ -45,7 +45,12 @@ func (h *PlantAggregateHandler) Run() {
 	plantRepo := repo.NewPlantRepo(db)
 	solarRepo := repo.NewSolarRepo(elastic)
 	serv := service.NewPlantAggregateService(plantRepo, solarRepo, h.logger)
-	if err := serv.UpdatePlantByDate(&now); err != nil {
+	if err := serv.UpdatePlantByDateToSQLite(&now); err != nil {
+		h.logger.Errorf("failed to update plant by date: %v", err)
+		return
+	}
+
+	if err := serv.UpdatePlantByDateToElastic(&now); err != nil {
 		h.logger.Errorf("failed to update plant by date: %v", err)
 		return
 	}
