@@ -12,7 +12,7 @@ type DailyProductionDocument struct {
 	Date               *time.Time `json:"date"`
 	VendorType         *string    `json:"vendor_type"`
 	Area               *string    `json:"area"`
-	SiteName           *string    `json:"site_name"`
+	SiteName           *string    `json:"name"`
 	InstalledCapacity  *float64   `json:"installed_capacity"`
 	DailyProduction    *float64   `json:"daily_production"`
 	Latitude           *float64   `json:"lat"`
