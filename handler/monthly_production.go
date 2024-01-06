@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/HavvokLab/true-solar-monitoring/constant"
@@ -40,7 +41,8 @@ func (h *MonthlyProductionHandler) RunAll() {
 	end := start.AddDate(0, 1, 0).AddDate(0, 0, -1) // (1 january + 1 month) - 1 day = last day of current month
 
 	for {
-		pool.Submit(h.run(&start, &end))
+		// pool.Submit(h.run(&start, &end))
+		fmt.Printf("start: %v | end: %v\n", start.String(), end.String())
 		if now.Month() == start.Month() && now.Year() == start.Year() {
 			break
 		}
