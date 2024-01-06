@@ -40,6 +40,8 @@ func (h *MonthlyProductionHandler) RunAll() {
 	end := start.AddDate(0, 1, 0).AddDate(0, 0, -1) // (1 january + 1 month) - 1 day = last day of current month
 
 	for {
+		start := start
+		end := end
 		pool.Submit(h.run(&start, &end))
 		if now.Month() == start.Month() && now.Year() == start.Year() {
 			break
