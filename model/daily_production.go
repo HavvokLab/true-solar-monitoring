@@ -13,6 +13,7 @@ type DailyProductionDocument struct {
 	VendorType         *string    `json:"vendor_type"`
 	Area               *string    `json:"area"`
 	SiteName           *string    `json:"name"`
+	Owner              *string    `json:"owner"`
 	InstalledCapacity  *float64   `json:"installed_capacity"`
 	DailyProduction    *float64   `json:"daily_production"`
 	Latitude           *float64   `json:"lat"`
@@ -45,6 +46,10 @@ func (d *DailyProductionDocument) SetArea(data string) {
 
 func (d *DailyProductionDocument) SetSiteName(data string) {
 	d.SiteName = d.parseString(data)
+}
+
+func (d *DailyProductionDocument) SetOwner(data string) {
+	d.Owner = d.parseString(data)
 }
 
 func (d *DailyProductionDocument) SetInstalledCapacity(data *float64) {

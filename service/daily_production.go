@@ -107,6 +107,10 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 			doc.SetSiteName(val)
 		}
 
+		if val, ok := item.Key["owner"].(string); ok {
+			doc.SetOwner(val)
+		}
+
 		// took data from max_aggregation
 		if val, ok := item.Aggregations.Max("lat"); ok {
 			doc.SetLatitude(val.Value)

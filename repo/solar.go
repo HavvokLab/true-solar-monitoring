@@ -113,6 +113,7 @@ func (r *solarRepo) GetPlantDailyProduction(start, end *time.Time) ([]*elastic.A
 			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("area").Field("area.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("name").Field("name.keyword"),
+			elastic.NewCompositeAggregationTermsValuesSource("owner").Field("owner.keyword"),
 		)
 
 	// assign [max_aggregation] into composite aggregation
@@ -207,6 +208,7 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("area").Field("area.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("name").Field("name.keyword"),
+			elastic.NewCompositeAggregationTermsValuesSource("owner").Field("owner.keyword"),
 		)
 
 	// assign [max_aggregation] into composite aggregation

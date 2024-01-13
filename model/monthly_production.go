@@ -13,6 +13,7 @@ type MonthlyProductionDocument struct {
 	VendorType         *string    `json:"vendor_type"`
 	Area               *string    `json:"area"`
 	SiteName           *string    `json:"name"`
+	Owner              *string    `json:"owner"`
 	InstalledCapacity  *float64   `json:"installed_capacity"`
 	MonthlyProduction  *float64   `json:"monthly_production"`
 	Latitude           *float64   `json:"lat"`
@@ -45,6 +46,10 @@ func (d *MonthlyProductionDocument) SetArea(data string) {
 
 func (d *MonthlyProductionDocument) SetSiteName(data string) {
 	d.SiteName = d.parseString(data)
+}
+
+func (d *MonthlyProductionDocument) SetOwner(data string) {
+	d.Owner = d.parseString(data)
 }
 
 func (d *MonthlyProductionDocument) SetInstalledCapacity(data *float64) {
