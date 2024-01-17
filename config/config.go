@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"strings"
 	"sync"
 
@@ -11,7 +12,7 @@ var once sync.Once
 var config *Config
 
 func InitConfig() {
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(OriginPath)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
@@ -34,4 +35,16 @@ func GetConfig() Config {
 	}
 
 	return *config
+}
+
+var OriginPath string
+
+func InitOriginPath() {
+	exePath, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	OriginPath = exePath
+	// OriginPath = filepath.Dir(exePath)
 }
