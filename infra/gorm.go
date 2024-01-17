@@ -1,9 +1,6 @@
 package infra
 
 import (
-	"path/filepath"
-
-	"github.com/HavvokLab/true-solar-monitoring/config"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -14,7 +11,7 @@ func NewGormDB(paths ...string) (*gorm.DB, error) {
 		path = paths[0]
 	}
 
-	db, err := gorm.Open(sqlite.Open(filepath.Join(config.OriginPath, path)), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
