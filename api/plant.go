@@ -19,5 +19,6 @@ func bindPrivatePlantAPI(router fiber.Router) {
 	sub := router.Group("/plant")
 	sub.Use(authMiddleware())
 	sub.Get("", authWrapper(hdl.FindAll))
+	sub.Get("all", authWrapper(hdl.All))
 	sub.Delete("/:id", authWrapper(hdl.Delete))
 }

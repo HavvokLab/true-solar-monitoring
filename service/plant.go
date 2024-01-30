@@ -15,6 +15,7 @@ type PlantService interface {
 	BulkCreate([]*model.Plant) error
 	ExportToCsv() error
 	FindAllWithPagination(offset, limit int) (*domain.FindAllPlantResponse, error)
+	FindAll() ([]*model.Plant, error)
 	Delete(id int64) error
 }
 
@@ -98,4 +99,13 @@ func (s *plantService) FindAllWithPagination(offset, limit int) (*domain.FindAll
 
 func (s *plantService) Delete(id int64) error {
 	return s.repo.Delete(id)
+}
+
+func (s *plantService) FindAll() ([]*model.Plant, error) {
+	data, err := s.repo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

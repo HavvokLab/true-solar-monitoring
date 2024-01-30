@@ -26,6 +26,15 @@ func (h *plantHandler) FindAll(utx *domain.UserContext, c *fiber.Ctx) error {
 	return util.ResponseOK(c, result)
 }
 
+func (h *plantHandler) All(utx *domain.UserContext, c *fiber.Ctx) error {
+	result, err := h.serv.FindAll()
+	if err != nil {
+		return util.ResponseError(c, err)
+	}
+
+	return util.ResponseOK(c, result)
+}
+
 func (h *plantHandler) Delete(utx *domain.UserContext, c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
