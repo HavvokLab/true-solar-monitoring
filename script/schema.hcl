@@ -22,7 +22,7 @@ table "tbl_growatt_credentials" {
   }
 
   column "owner" {
-    type = varchar(32)
+    type    = varchar(32)
     default = "TRUE"
   }
 
@@ -75,7 +75,7 @@ table "tbl_solarman_credentials" {
   }
 
   column "owner" {
-    type = varchar(32)
+    type    = varchar(32)
     default = "TRUE"
   }
 
@@ -124,7 +124,7 @@ table "tbl_huawei_credentials" {
   }
 
   column "version" {
-    type = integer
+    type    = integer
     default = 1
     check "unsigned version" {
       expr = "version > 0"
@@ -172,7 +172,7 @@ table "tbl_kstar_credentials" {
   }
 
   column "owner" {
-    type = varchar(32)
+    type    = varchar(32)
     default = "TRUE"
   }
 
@@ -439,8 +439,8 @@ table "tbl_plants" {
   }
 
   column "owner" {
-    type = varchar(32)
-    null = true
+    type    = varchar(32)
+    null    = true
     default = "TRUE"
   }
 
@@ -468,5 +468,137 @@ table "tbl_plants" {
   index "idx_plant_name" {
     columns = [column.name]
     unique  = true
+  }
+}
+
+table "tbl_huawei_altervim_plants" {
+  schema = schema.main
+
+  column "code" {
+    null = false
+    type = varchar(128)
+  }
+
+  column "name" {
+    null = true
+    type = varchar(128)
+  }
+
+  column "address" {
+    null = true
+    type = text
+  }
+
+  column "longitude" {
+    null = true
+    type = text
+  }
+
+  column "latitude" {
+    null = true
+    type = text
+  }
+
+  column "capacity" {
+    null = true
+    type = double
+  }
+
+  column "contact_person" {
+    null = true
+    type = text
+  }
+
+  column "contact_method" {
+    null = true
+    type = text
+  }
+
+  column "grid_connection_data" {
+    null = true
+    type = text
+  }
+
+  column "created_at" {
+    null    = false
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  column "updated_at" {
+    null      = false
+    type      = datetime
+    default   = sql("CURRENT_TIMESTAMP")
+    on_update = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.code]
+  }
+}
+
+table "tbl_huawei_altervim_devices" {
+  schema = schema.main
+
+  column "id" {
+    null = false
+    type = integer
+  }
+
+  column "serial_number" {
+    null = true
+    type = varchar(128)
+  }
+
+  column "name" {
+    null = true
+    type = text
+  }
+
+  column "type_id" {
+    null = true
+    type = integer
+  }
+
+  column "inverter_model" {
+    null = true
+    type = text
+  }
+
+  column "latitude" {
+    null = true
+    type = double
+  }
+
+  column "longitude" {
+    null = true
+    type = double
+  }
+
+  column "software_version" {
+    null = true
+    type = text
+  }
+
+  column "plant_code" {
+    null = true
+    type = text
+  }
+
+  column "created_at" {
+    null    = false
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  column "updated_at" {
+    null      = false
+    type      = datetime
+    default   = sql("CURRENT_TIMESTAMP")
+    on_update = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
   }
 }
