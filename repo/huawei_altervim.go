@@ -3,13 +3,16 @@ package repo
 import (
 	"github.com/HavvokLab/true-solar-monitoring/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type HuaweiAltervimRepo interface {
 	BatchInsertPlants([]model.HuaweiAltervimPlant) error
 	BatchInsertDevices([]model.HuaweiAltervimDevice) error
+	GetLatestPlant() (*model.HuaweiAltervimPlant, error)
 	GetPlants() ([]model.HuaweiAltervimPlant, error)
 	GetDevices() ([]model.HuaweiAltervimDevice, error)
+	GetDeviceByPlantCode(code string) ([]model.HuaweiAltervimDevice, error)
 	DeletePlantNotIn(codes []string) error
 	DeleteDeviceNotIn(ids []int) error
 }
@@ -26,7 +29,8 @@ func NewHuaweiAltervimRepo(db *gorm.DB) *huaweiAltervimRepo {
 
 func (r *huaweiAltervimRepo) BatchInsertPlants(data []model.HuaweiAltervimPlant) error {
 	tx := r.db.Session(&gorm.Session{})
-	if err := tx.CreateInBatches(data, 100).Error; err != nil {
+	if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).
+		CreateInBatches(data, 100).Error; err != nil {
 		return err
 	}
 
@@ -35,7 +39,8 @@ func (r *huaweiAltervimRepo) BatchInsertPlants(data []model.HuaweiAltervimPlant)
 
 func (r *huaweiAltervimRepo) BatchInsertDevices(data []model.HuaweiAltervimDevice) error {
 	tx := r.db.Session(&gorm.Session{})
-	if err := tx.CreateInBatches(data, 100).Error; err != nil {
+	if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).
+		CreateInBatches(data, 100).Error; err != nil {
 		return err
 	}
 
@@ -56,6 +61,16 @@ func (r *huaweiAltervimRepo) GetDevices() ([]model.HuaweiAltervimDevice, error) 
 	tx := r.db.Session(&gorm.Session{})
 	data := []model.HuaweiAltervimDevice{}
 	if err := tx.Find(&data).Error; err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (r *huaweiAltervimRepo) GetDeviceByPlantCode(code string) ([]model.HuaweiAltervimDevice, error) {
+	tx := r.db.Session(&gorm.Session{})
+	data := []model.HuaweiAltervimDevice{}
+	if err := tx.Find(&data, "plant_code = ?", code).Error; err != nil {
 		return nil, err
 	}
 
@@ -84,4 +99,14 @@ func (r *huaweiAltervimRepo) DeleteDeviceNotIn(ids []int) error {
 	}
 
 	return nil
+}
+
+func (r *huaweiAltervimRepo) GetLatestPlant() (*model.HuaweiAltervimPlant, error) {
+	tx := r.db.Session(&gorm.Session{})
+	data := model.HuaweiAltervimPlant{}
+	if err := tx.Find(&data).Order("updated_at DESC").Error; err != nil {
+		return nil, err
+	}
+
+	return &data, nil
 }

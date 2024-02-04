@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"go.openly.dev/pointy"
+)
 
 type HuaweiAltervimPlant struct {
 	Code               string     `gorm:"column:code" json:"code"`
@@ -20,6 +24,78 @@ func (*HuaweiAltervimPlant) TableName() string {
 	return "tbl_huawei_altervim_plants"
 }
 
+func (p *HuaweiAltervimPlant) GetPlantName(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(p.Name, value)
+}
+
+func (p *HuaweiAltervimPlant) GetPlantAddress(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(p.Address, value)
+}
+
+func (p *HuaweiAltervimPlant) GetLongitude(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(p.Longitude, value)
+}
+
+func (p *HuaweiAltervimPlant) GetLatitude(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(p.Latitude, value)
+}
+
+func (p *HuaweiAltervimPlant) GetCapacity(defaultValue ...float64) float64 {
+	value := 0.0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.Float64Value(p.Capacity, value)
+}
+
+func (p *HuaweiAltervimPlant) GetContactPerson(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(p.ContactPerson, value)
+}
+
+func (p *HuaweiAltervimPlant) GetContactMethod(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(p.ContactMethod, value)
+}
+
+func (p *HuaweiAltervimPlant) GetGridConnectionDate(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(p.GridConnectionData, value)
+}
+
 type HuaweiAltervimDevice struct {
 	ID              int        `gorm:"column:id" json:"id"`
 	SerialNumber    *string    `gorm:"column:serial_number" json:"serial_number"`
@@ -36,4 +112,76 @@ type HuaweiAltervimDevice struct {
 
 func (*HuaweiAltervimDevice) TableName() string {
 	return "tbl_huawei_altervim_devices"
+}
+
+func (d *HuaweiAltervimDevice) GetSN(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(d.SerialNumber, value)
+}
+
+func (d *HuaweiAltervimDevice) GetName(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(d.Name, value)
+}
+
+func (d *HuaweiAltervimDevice) GetTypeID(defaultValue ...int) int {
+	value := 0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.IntValue(d.TypeID, value)
+}
+
+func (d *HuaweiAltervimDevice) GetInverterModel(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(d.InverterModel, value)
+}
+
+func (d *HuaweiAltervimDevice) GetLatitude(defaultValue ...float64) float64 {
+	value := 0.0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.Float64Value(d.Latitude, value)
+}
+
+func (d *HuaweiAltervimDevice) GetLongitude(defaultValue ...float64) float64 {
+	value := 0.0
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.Float64Value(d.Longitude, value)
+}
+
+func (d *HuaweiAltervimDevice) GetSoftwareVersion(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(d.SoftwareVersion, value)
+}
+
+func (d *HuaweiAltervimDevice) GetPlantCode(defaultValue ...string) string {
+	value := ""
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.StringValue(d.PlantCode, value)
 }
