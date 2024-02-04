@@ -55,7 +55,7 @@ func (h *HuaweiCollectorHandler) Run() {
 		case 1:
 			pool.Submit(h.runVersion1(&clone))
 		case 2:
-			pool.Submit(h.runVersion2(&clone))
+			// pool.Submit(h.runVersion2(&clone))
 		default:
 			// do nothing
 		}

@@ -51,7 +51,11 @@ func (h *HuaweiAlarmHandler) Run() {
 	pool := workerpool.New(len(credentials))
 	for _, credential := range credentials {
 		clone := credential
-		pool.Submit(h.run(&clone))
+		switch clone.Version {
+		case 1:
+			pool.Submit(h.run(&clone))
+		default:
+		}
 	}
 	pool.StopWait()
 
