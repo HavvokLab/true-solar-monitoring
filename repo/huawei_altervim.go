@@ -93,7 +93,7 @@ func (r *huaweiAltervimRepo) DeleteDeviceNotIn(ids []int) error {
 	tx := r.db.Session(&gorm.Session{})
 	if err := tx.
 		Where("id NOT IN ?", ids).
-		Delete(&model.HuaweiAltervimPlant{}).
+		Delete(&model.HuaweiAltervimDevice{}).
 		Error; err != nil {
 		return err
 	}

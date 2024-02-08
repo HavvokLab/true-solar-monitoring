@@ -555,16 +555,19 @@ func (s *huaweiCollectorV3Service) run(
 
 func (s *huaweiCollectorV3Service) PreparePlantAndDevice(credential *model.HuaweiCredential) error {
 	// check latest plant update
+	s.logger.Info("check latest plant")
 	plant, err := s.huaweiAltervimRepo.GetLatestPlant()
 	if err != nil {
 		s.logger.Error(err)
 		return err
 	}
 
-	nowStr := time.Now().Format("2006-01-02")
-	plantUpdateStr := plant.UpdatedAt.Format("2006-01-02")
-	if nowStr == plantUpdateStr {
-		return nil
+	if plant.Name != nil {
+		nowStr := time.Now().Format("2006-01-02")
+		plantUpdateStr := plant.UpdatedAt.Format("2006-01-02")
+		if nowStr == plantUpdateStr {
+			return nil
+		}
 	}
 
 	// preparing
@@ -580,16 +583,29 @@ func (s *huaweiCollectorV3Service) PreparePlantAndDevice(credential *model.Huawe
 	plantData := []model.HuaweiAltervimPlant{}
 	deviceData := []model.HuaweiAltervimDevice{}
 	plantCodes := []string{}
+	plantCodeStr := []string{}
 	deviceIds := []int{}
 
+	s.logger.Info("getting plant list...")
 	plants, err := client.GetPlantList()
 	if err != nil {
 		s.logger.Error(err)
 		return err
 	}
+	s.logger.Infof("got %v plant", len(plants))
 
+	count := 1
+	s.logger.Info("start preparing")
 	for _, plant := range plants {
+		s.logger.Infof("%v/%v", count, len(plants))
+		count += 1
+
+		if len(plantCodes) >= 100 {
+			plantCodeStr = append(plantCodeStr, strings.Join(plantCodes, ","))
+			plantCodes = []string{}
+		}
 		plantCodes = append(plantCodes, *plant.PlantCode)
+
 		plantData = append(plantData, model.HuaweiAltervimPlant{
 			Code:               plant.GetPlantCode(),
 			Name:               plant.PlantName,
@@ -601,8 +617,11 @@ func (s *huaweiCollectorV3Service) PreparePlantAndDevice(credential *model.Huawe
 			ContactMethod:      plant.ContactMethod,
 			GridConnectionData: plant.GridConnectionDate,
 		})
+	}
+	plantCodeStr = append(plantCodeStr, strings.Join(plantCodes, ","))
 
-		if resp, err := client.GetDeviceList(plant.GetPlantCode()); err != nil {
+	for _, code := range plantCodeStr {
+		if resp, err := client.GetDeviceList(code); err != nil {
 			s.logger.Error(err)
 			return err
 		} else if len(resp.Data) > 0 {
