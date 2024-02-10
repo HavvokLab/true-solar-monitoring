@@ -33,10 +33,10 @@ type SnmpPerformanceAlarmItem struct {
 	LastedUpdateTime string    `json:"lasted_update_time"`
 }
 
-func NewSnmpPerformanceAlarmItem(vendorType, deviceName, alertName, description, severity, lastedUpdateTime string) SnmpAlarmItem {
-	return SnmpAlarmItem{
+func NewSnmpPerformanceAlarmItem(t, deviceName, alertName, description, severity, lastedUpdateTime string) SnmpPerformanceAlarmItem {
+	return SnmpPerformanceAlarmItem{
 		Timestamp:        time.Now(),
-		VendorType:       vendorType,
+		Type:             t,
 		DeviceName:       deviceName,
 		Description:      description,
 		Severity:         severity,

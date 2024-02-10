@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/constant"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/model"
@@ -43,16 +44,16 @@ func (s *lowPerformanceAlarmService) Run() error {
 		return err
 	}
 
-	config, err := s.getConfig()
+	cfg, err := s.getConfig()
 	if err != nil {
 		return err
 	}
 
 	efficiencyFactor := installedCapacityConfig.EfficiencyFactor
 	focusHour := installedCapacityConfig.FocusHour
-	hitDay := *config.HitDay
-	duration := *config.Duration
-	percentage := config.Percentage / 100.0
+	hitDay := *cfg.HitDay
+	duration := *cfg.Duration
+	percentage := cfg.Percentage / 100.0
 
 	s.logger.Infof("Retrieving low performance alarm service with duration: %d, hit day: %d, percentage: %.2f%%, efficiency factor: %.2f, focus hour: %v", duration, hitDay, percentage*100.0, efficiencyFactor, focusHour)
 	buckets, err := s.solarRepo.GetPerformanceLow(duration, efficiencyFactor, focusHour, percentage)
@@ -124,6 +125,7 @@ func (s *lowPerformanceAlarmService) Run() error {
 
 	var alarmCount int
 	var failedAlarmCount int
+	documents := make([]interface{}, 0)
 	if len(filteredBuckets) > 0 {
 		bucketBatches := s.chunkBy(filteredBuckets, constant.PERFORMANCE_ALARM_SNMP_BATCH_SIZE)
 
@@ -137,18 +139,20 @@ func (s *lowPerformanceAlarmService) Run() error {
 				for _, data := range batch {
 					if count, ok := data["count"].(int); ok {
 						if count >= hitDay {
-							plantName, alarmName, description, severity, err := s.getSNMPPayload(constant.PERFORMANCE_ALARM_TYPE_PERFORMANCE_LOW, *config, *installedCapacityConfig, data)
+							plantName, alarmName, description, severity, err := s.getSNMPPayload(constant.PERFORMANCE_ALARM_TYPE_PERFORMANCE_LOW, *cfg, *installedCapacityConfig, data)
 							if err != nil {
 								s.logger.Error(err)
 								continue
 							}
 
+							document := model.NewSnmpPerformanceAlarmItem("low", plantName, alarmName, description, severity, now.Format(time.RFC3339Nano))
 							if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, description, severity, now.Format(time.RFC3339Nano)); err != nil {
 								failedAlarmCount++
 								failedBatchAlarmCount++
 								s.logger.Error(err)
 								continue
 							}
+							documents = append(documents, document)
 
 							s.logger.Infof("SendAlarmTrap: plantName: %s, alarmName: %s, description: %s, severity: %s", plantName, alarmName, description, severity)
 							alarmCount++
@@ -168,6 +172,14 @@ func (s *lowPerformanceAlarmService) Run() error {
 		s.logger.Infof("failed to send %d alarms", failedAlarmCount)
 		s.logger.Infof("polling finished in %v", time.Since(now).String())
 	}
+
+	elasticCfg := config.GetConfig().Elastic
+	index := fmt.Sprintf("%s-%s", elasticCfg.PerformanceAlarmIndex, now.Format("2006.01.02"))
+	if err := s.solarRepo.BulkIndex(index, documents); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+	s.logger.Infof("DailyPerformanceAlarm(): saved %v alarms", len(documents))
 
 	return nil
 }

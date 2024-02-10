@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/constant"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/model"
@@ -57,15 +58,15 @@ func (s *dailyPerformanceAlarmService) Run() error {
 		return err
 	}
 
-	config, err := s.getConfig()
+	cfg, err := s.getConfig()
 	if err != nil {
 		return err
 	}
 
 	efficiencyFactor := installedCapacityConfig.EfficiencyFactor
 	focusHour := installedCapacityConfig.FocusHour
-	duration := *config.Duration
-	percentage := config.Percentage / 100.0
+	duration := *cfg.Duration
+	percentage := cfg.Percentage / 100.0
 	s.logger.Infof("Retrieving daily performance alarm service with duration: %d, percentage: %.2f%%, efficiency factor: %.2f, focus hour: %v", duration, percentage*100.0, efficiencyFactor, focusHour)
 
 	date := now.AddDate(0, 0, -1)
@@ -79,6 +80,7 @@ func (s *dailyPerformanceAlarmService) Run() error {
 	var failAlarmCount int
 	var clearAlarmCount int
 	var count int = 1
+	documents := make([]interface{}, 0)
 	size := len(buckets)
 	for _, bucketPtr := range buckets {
 		s.logger.Infof("Processing bucket %d/%v", count, size)
@@ -121,7 +123,7 @@ func (s *dailyPerformanceAlarmService) Run() error {
 				}
 			}
 
-			plantName, alarmName, payload, severity, err := s.getPayload(&date, dailyProduction, threshold, plantItem, *installedCapacityConfig, *config)
+			plantName, alarmName, payload, severity, err := s.getPayload(&date, dailyProduction, threshold, plantItem, *installedCapacityConfig, *cfg)
 			if err != nil {
 				if errors.Is(err, ErrDailyProductionUnderThreshold) {
 					continue
@@ -131,10 +133,12 @@ func (s *dailyPerformanceAlarmService) Run() error {
 				continue
 			}
 
+			document := model.NewSnmpPerformanceAlarmItem("clear", plantName, alarmName, payload, severity, now.Format(time.RFC3339Nano))
 			if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, payload, severity, now.Format(time.RFC3339Nano)); err != nil {
 				s.logger.Error(err)
 				continue
 			}
+			documents = append(documents, document)
 
 			s.logger.Infof("SendAlarmTrap: %s, %s, %s, %s", plantName, alarmName, payload, severity)
 			if severity == constant.MAJOR_SEVERITY {
@@ -146,6 +150,14 @@ func (s *dailyPerformanceAlarmService) Run() error {
 
 		s.logger.Infof("Sending alarm fail: %v, clear: %v", failAlarmCount, clearAlarmCount)
 	}
+
+	elasticCfg := config.GetConfig().Elastic
+	index := fmt.Sprintf("%s-%s", elasticCfg.PerformanceAlarmIndex, now.Format("2006.01.02"))
+	if err := s.solarRepo.BulkIndex(index, documents); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+	s.logger.Infof("DailyPerformanceAlarm(): saved %v alarms", len(documents))
 
 	return nil
 }
