@@ -75,7 +75,14 @@ func (h *SolarmanAlarmHandler) run(credential *model.SolarmanCredential) func() 
 		}
 		defer rdb.Close()
 
-		serv := service.NewSolarmanAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewSolarmanAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return
@@ -125,7 +132,14 @@ func (h *SolarmanAlarmHandler) mock(credential *model.SolarmanCredential) func()
 		}
 		defer rdb.Close()
 
-		serv := service.NewSolarmanAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewSolarmanAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Error(err)
 		}

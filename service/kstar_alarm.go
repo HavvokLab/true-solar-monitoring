@@ -120,7 +120,6 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 					return err
 				}
 
-				documents = append(documents, document)
 				s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, plantName, alarmName, payload, constant.MAJOR_SEVERITY, saveTime)
 			case 1:
 				realtimeAlarmResp, err := client.GetRealtimeAlarmListOfDevice(deviceID)
@@ -137,7 +136,6 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 						s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 						return err
 					}
-					documents = append(documents, document)
 
 					if err := s.redisClient.Del(ctx, alarmName).Err(); err != nil {
 						s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
@@ -162,7 +160,6 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 							return err
 						}
 
-						documents = append(documents, document)
 						s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, plantName, alarmMessage, payload, constant.MAJOR_SEVERITY, alarmTime)
 					}
 					continue
@@ -241,11 +238,11 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 							s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 							return err
 						}
-						documents = append(documents, document)
 					}
 				}
 			default:
 			}
+			documents = append(documents, document)
 		}
 	}
 
@@ -255,7 +252,7 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 		s.logger.Error(err)
 		return err
 	}
-	s.logger.Infof("GrowattAlarm(): saved %v alarms", len(documents))
+	s.logger.Infof("KStarAlarm(): saved %v alarms", len(documents))
 
 	return nil
 }

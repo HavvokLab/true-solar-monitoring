@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/constant"
 	"github.com/HavvokLab/true-solar-monitoring/inverter/solarman"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
@@ -23,15 +24,17 @@ type SolarmanAlarmService interface {
 
 type solarmanAlarmService struct {
 	brand       string
+	solarRepo   repo.SolarRepo
 	snmpRepo    repo.SnmpRepo
 	redisClient *redis.Client
 	logger      logger.Logger
 }
 
-func NewSolarmanAlarmService(snmpRepo repo.SnmpRepo, redisClient *redis.Client, logger logger.Logger) SolarmanAlarmService {
+func NewSolarmanAlarmService(solarRepo repo.SolarRepo, snmpRepo repo.SnmpRepo, redisClient *redis.Client, logger logger.Logger) SolarmanAlarmService {
 	const brand = "INVT-Ipanda"
 	return &solarmanAlarmService{
 		brand:       brand,
+		solarRepo:   solarRepo,
 		snmpRepo:    snmpRepo,
 		redisClient: redisClient,
 		logger:      logger,
@@ -48,6 +51,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 	ctx := context.Background()
 	now := time.Now()
 	beginningOfDay := time.Date(now.Year(), now.Month(), now.Day(), 6, 0, 0, 0, time.Local)
+	documents := make([]interface{}, 0)
 
 	if credential == nil {
 		s.logger.Errorf("credential should not be empty")
@@ -129,6 +133,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 				deviceCollectionTimeStr := strconv.FormatInt(deviceCollectionTime, 10)
 
 				if device.ConnectStatus != nil {
+					var document interface{}
 					switch device.GetConnectStatus() {
 					case 0:
 						rkey := fmt.Sprintf("%s,%d,%s,%s,%d,%s", s.brand, stationID, deviceType, deviceSN, deviceID, "Disconnect")
@@ -143,6 +148,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 						name := fmt.Sprintf("%s-%s", stationName, deviceSN)
 						alert := strings.ReplaceAll(fmt.Sprintf("%s-%s", deviceType, "Disconnect"), " ", "-")
 						description := fmt.Sprintf("%s,%d,%s,%d", s.brand, stationID, deviceSN, deviceID)
+						document = model.NewSnmpAlarmItem(s.brand, name, alert, description, constant.MAJOR_SEVERITY, deviceCollectionTimeStr)
 						err = s.snmpRepo.SendAlarmTrap(name, alert, description, constant.MAJOR_SEVERITY, deviceCollectionTimeStr)
 						if err != nil {
 							s.logger.Error(err)
@@ -188,6 +194,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 								name := fmt.Sprintf("%s-%s", stationName, deviceSN)
 								alert := strings.ReplaceAll(fmt.Sprintf("%s-%s", deviceType, splitKey[5]), " ", "-")
 								description := fmt.Sprintf("%s,%d,%s,%d", s.brand, stationID, deviceSN, deviceID)
+								document = model.NewSnmpAlarmItem(s.brand, name, alert, description, constant.CLEAR_SEVERITY, splitVal[1])
 								if err := s.snmpRepo.SendAlarmTrap(name, alert, description, constant.CLEAR_SEVERITY, splitVal[1]); err != nil {
 									s.logger.Error(err)
 									return err
@@ -225,6 +232,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 								name := fmt.Sprintf("%s-%s", stationName, deviceSN)
 								alert := strings.ReplaceAll(fmt.Sprintf("%s-%s", deviceType, alertName), " ", "-")
 								description := fmt.Sprintf("%s,%d,%s,%d", s.brand, stationID, deviceSN, deviceID)
+								document = model.NewSnmpAlarmItem(s.brand, name, alert, description, constant.MAJOR_SEVERITY, alertTimeStr)
 								if err := s.snmpRepo.SendAlarmTrap(name, alert, description, constant.MAJOR_SEVERITY, alertTimeStr); err != nil {
 									s.logger.Error(err)
 									return err
@@ -236,10 +244,19 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 						}
 					default:
 					}
+					documents = append(documents, document)
 				}
 			}
 		}
 	}
+
+	elasticCfg := config.GetConfig().Elastic
+	index := fmt.Sprintf("%s-%s", elasticCfg.AlarmIndex, time.Now().Format("2006.01.02"))
+	if err := s.solarRepo.BulkIndex(index, documents); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+	s.logger.Infof("SolarmanAlarm(): saved %v alarms", len(documents))
 
 	return nil
 }
