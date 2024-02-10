@@ -1,30 +1,61 @@
+api:
+  port: 3000
+
+authentication:
+  secret:
+
 elasticsearch:
-  host: http://localhost:9200
+  host:
   username:
   password:
-  solar_index: solarcell
-  site_station_index: site-station
-  daily_production_index: daily_production
-  monthly_production_index: monthly_production
+  solar_index:
+  site_station_index:
+  daily_production_index:
+  monthly_production_index:
 
 redis:
-  host: localhost
-  port: 6379
+  host:
+  port:
   username:
-  password: abcd1234
-  db: 0
+  password:
+  db:
 
 snmp:
-  agent_host: 10.50.89.234
-  target_host: 10.50.197.29
-  target_port: 22010
+  agent_host:
+  target_host:
+  target_port:
+
+plant_aggr:
+  crontab:
+
+calculate_production:
+  crontab:
 
 low_performance_alarm:
-  crontab: "*/5 * * * *"
+  crontab:
 
 sum_performance_alarm:
-  crontab: "*/5 * * * *"
+  crontab:
+
+daily_performance_alarm:
+  crontab:
 
 solarman:
-  collector_crontab: "*/5 * * * *" 
-  alarm_crontab: "*/5 * * * *"
+  collector_crontab:
+  night_collector_crontab:
+  alarm_crontab:
+
+huawei:
+  collector_crontab:
+  night_collector_crontab:
+  alarm_crontab:
+
+kstar:
+  collector_crontab:
+  night_collector_crontab:
+  alarm_crontab:
+
+growatt:
+  collector_crontab:
+  night_collector_crontab:
+  alarm_crontab:
