@@ -80,7 +80,14 @@ func (h *HuaweiAlarmHandler) run(credential *model.HuaweiCredential) func() {
 		}
 		defer rdb.Close()
 
-		serv := service.NewHuaweiAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewHuaweiAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return
@@ -138,7 +145,14 @@ func (h *HuaweiAlarmHandler) mock(credential *model.HuaweiCredential) func() {
 		}
 		defer rdb.Close()
 
-		serv := service.NewHuaweiAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewHuaweiAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return

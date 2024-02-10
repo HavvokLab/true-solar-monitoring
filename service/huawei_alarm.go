@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/constant"
 	"github.com/HavvokLab/true-solar-monitoring/inverter/huawei"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
@@ -21,17 +22,22 @@ type HuaweiAlarmService interface {
 }
 
 type huaweiAlarmService struct {
+	vendorType  string
+	solarRepo   repo.SolarRepo
 	snmpRepo    repo.SnmpRepo
 	redisClient *redis.Client
 	logger      logger.Logger
 }
 
 func NewHuaweiAlarmService(
+	solarRepo repo.SolarRepo,
 	snmpRepo repo.SnmpRepo,
 	redisClient *redis.Client,
 	logger logger.Logger,
 ) HuaweiAlarmService {
 	return &huaweiAlarmService{
+		vendorType:  strings.ToUpper(constant.VENDOR_TYPE_HUAWEI),
+		solarRepo:   solarRepo,
 		snmpRepo:    snmpRepo,
 		redisClient: redisClient,
 		logger:      logger,
@@ -43,6 +49,7 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 	ctx := context.Background()
 	beginTime := time.Date(now.Year(), now.Month(), now.Day(), 6, 0, 0, 0, time.Local).UnixNano() / 1e6
 	endTime := now.UnixNano() / 1e6
+	documents := make([]interface{}, 0)
 
 	client, err := huawei.NewHuaweiClient(&huawei.HuaweiCredential{
 		Username: credential.Username,
@@ -202,11 +209,13 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 
 					alarmName := fmt.Sprintf("HUW-%s", "Disconnect")
 					payload := fmt.Sprintf("Huawei,%s,%s", deviceName, "Disconnect")
+					document := model.NewSnmpAlarmItem(s.vendorType, plantName, alarmName, payload, constant.MAJOR_SEVERITY, shutdownTime)
 					if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, payload, constant.MAJOR_SEVERITY, shutdownTime); err != nil {
 						s.logger.Error(err)
 						return err
 					}
 					s.logger.Infof("send alarm trap, plantName: %s, alarmName: %s, payload: %s, severity: %s, shutdownTime: %s", plantName, alarmName, payload, constant.MAJOR_SEVERITY, shutdownTime)
+					documents = append(documents, document)
 					continue
 				}
 			}
@@ -227,11 +236,14 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 
 					alarmName = strings.ReplaceAll(fmt.Sprintf("HUW-%s", alarmName), " ", "-")
 					payload := fmt.Sprintf("Huawei,%s,%s", deviceName, alarmCause)
+
+					document := model.NewSnmpAlarmItem(s.vendorType, plantName, alarmName, payload, constant.MAJOR_SEVERITY, alarmTime)
 					if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, payload, constant.MAJOR_SEVERITY, alarmTime); err != nil {
 						s.logger.Error(err)
 						return err
 					}
 					s.logger.Infof("send alarm trap, plantName: %s, alarmName: %s, payload: %s, severity: %s, alarmTime: %s", plantName, alarmName, payload, constant.MAJOR_SEVERITY, alarmTime)
+					documents = append(documents, document)
 				}
 
 				continue
@@ -270,6 +282,7 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 
 					alarmName := strings.ReplaceAll(fmt.Sprintf("HUW-%s", splitKey[4]), " ", "-")
 					payload := fmt.Sprintf("Huawei,%s,%s", deviceName, splitVal[1])
+					document := model.NewSnmpAlarmItem(s.vendorType, plantName, alarmName, payload, constant.MAJOR_SEVERITY, splitVal[2])
 					if err := s.snmpRepo.SendAlarmTrap(
 						splitVal[0],
 						alarmName,
@@ -280,6 +293,7 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 						s.logger.Error(err)
 						return err
 					}
+					documents = append(documents, document)
 
 					s.logger.Infof("send alarm trap, plantName: %s, alarmName: %s, payload: %s, severity: %s, alarmTime: %s", splitVal[0], alarmName, payload, constant.CLEAR_SEVERITY, splitVal[2])
 
@@ -291,6 +305,14 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 			}
 		}
 	}
+
+	elasticCfg := config.GetConfig().Elastic
+	index := fmt.Sprintf("%s-%s", elasticCfg.AlarmIndex, now.Format("2006.01.02"))
+	if err := s.solarRepo.BulkIndex(index, documents); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+	s.logger.Infof("HuaweiAlarm(): saved %v alarms", len(documents))
 
 	return nil
 }

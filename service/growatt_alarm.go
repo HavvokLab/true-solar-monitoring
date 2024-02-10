@@ -45,7 +45,7 @@ func NewGrowattAlarmService(
 
 func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 	now := time.Now()
-	documents := []interface{}{}
+	documents := make([]interface{}, 0)
 	ctx := context.Background()
 	client, err := growatt.NewGrowattClient(&growatt.GrowattCredential{Username: credential.Username, Token: credential.Token})
 	if err != nil {
