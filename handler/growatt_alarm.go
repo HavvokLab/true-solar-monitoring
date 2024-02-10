@@ -76,7 +76,14 @@ func (h *GrowattAlarmHandler) run(credential *model.GrowattCredential) func() {
 		}
 		defer rdb.Close()
 
-		serv := service.NewGrowattAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewGrowattAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return
@@ -134,7 +141,14 @@ func (h *GrowattAlarmHandler) mock(credential *model.GrowattCredential) func() {
 		}
 		defer rdb.Close()
 
-		serv := service.NewGrowattAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewGrowattAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return

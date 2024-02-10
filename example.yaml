@@ -12,6 +12,8 @@ elasticsearch:
   site_station_index:
   daily_production_index:
   monthly_production_index:
+  performance_alarm_index:
+  alarm_index:
 
 redis:
   host:

@@ -25,6 +25,8 @@ type ElasticsearchConfig struct {
 	SiteStationIndex       string `mapstructure:"site_station_index"`
 	DailyProductionIndex   string `mapstructure:"daily_production_index"`
 	MonthlyProductionIndex string `mapstructure:"monthly_production_index"`
+	AlarmIndex             string `mapstructure:"alarm_index"`
+	PerformanceAlarmIndex  string `mapstructure:"performance_alarm_index"`
 }
 
 type RedisConfig struct {

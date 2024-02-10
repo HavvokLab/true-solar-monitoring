@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/constant"
 	"github.com/HavvokLab/true-solar-monitoring/inverter/growatt"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
@@ -20,17 +21,22 @@ type GrowattAlarmService interface {
 }
 
 type growattAlarmService struct {
+	vendorType  string
 	snmpRepo    repo.SnmpRepo
+	solarRepo   repo.SolarRepo
 	redisClient *redis.Client
 	logger      logger.Logger
 }
 
 func NewGrowattAlarmService(
+	solarRepo repo.SolarRepo,
 	snmpRepo repo.SnmpRepo,
 	redisClient *redis.Client,
 	logger logger.Logger,
 ) GrowattAlarmService {
 	return &growattAlarmService{
+		vendorType:  strings.ToUpper(constant.VENDOR_TYPE_GROWATT),
+		solarRepo:   solarRepo,
 		snmpRepo:    snmpRepo,
 		redisClient: redisClient,
 		logger:      logger,
@@ -39,6 +45,7 @@ func NewGrowattAlarmService(
 
 func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 	now := time.Now()
+	documents := []interface{}{}
 	ctx := context.Background()
 	client, err := growatt.NewGrowattClient(&growatt.GrowattCredential{Username: credential.Username, Token: credential.Token})
 	if err != nil {
@@ -69,6 +76,7 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 			deviceStatus := growatt.GROWATT_INVERTER_STATUS_MAPPER[device.GetStatus()]
 			deviceType := growatt.GROWATT_EQUIP_TYPE_MAPPER[device.GetType()]
 			deviceName := fmt.Sprintf("%s_%d_%s", plantName, plantID, deviceSN)
+			var document interface{}
 
 			switch deviceStatus {
 			case "Online":
@@ -84,6 +92,7 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 					alarmName := fmt.Sprintf("Growatt,%s,%s", vals[1], deviceModel)
 					payload := fmt.Sprintf("%s-Error-%s", alarmName, vals[0])
 					severity := constant.CLEAR_SEVERITY
+					document = model.NewSnmpAlarmItem(s.vendorType, deviceName, payload, alarmName, severity, deviceLastUpdateTime)
 					if err := s.snmpRepo.SendAlarmTrap(deviceName, payload, alarmName, severity, deviceLastUpdateTime); err != nil {
 						s.logger.Errorf("[%v] Failed to send alarm trap: %v", credential.Username, err)
 						continue
@@ -108,6 +117,7 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 				alarmName := fmt.Sprintf("Growatt,Disconnect,%s", deviceModel)
 				payload := fmt.Sprintf("%s-Error-0", deviceType)
 				severity := "4"
+				document = model.NewSnmpAlarmItem(s.vendorType, deviceName, payload, alarmName, severity, deviceLastUpdateTime)
 				if err := s.snmpRepo.SendAlarmTrap(deviceName, payload, alarmName, severity, deviceLastUpdateTime); err != nil {
 					s.logger.Errorf("snmp.SendAlarmTrap(%v,%v,%v,%v,%v): %v", deviceName, payload, alarmName, severity, deviceLastUpdateTime, err)
 					continue
@@ -134,6 +144,7 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 					alarmName := fmt.Sprintf("Growatt,%s,%s", alarm.GetAlarmMessage(), deviceModel)
 					payload := fmt.Sprintf("%s-Error-%d", deviceType, alarm.GetAlarmCode())
 					severity := constant.MAJOR_SEVERITY
+					document = model.NewSnmpAlarmItem(s.vendorType, deviceName, payload, alarmName, severity, deviceLastUpdateTime)
 					if err := s.snmpRepo.SendAlarmTrap(deviceName, payload, alarmName, severity, date); err != nil {
 						s.logger.Errorf("[%v] Failed to send alarm trap: %v", credential.Username, err)
 						continue
@@ -142,10 +153,20 @@ func (s *growattAlarmService) Run(credential *model.GrowattCredential) error {
 					s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, deviceName, alarmName, payload, severity, date)
 				}
 			}
+
+			documents = append(documents, document)
 		}
 
 		time.Sleep(10 * time.Second)
 	}
+
+	elasticCfg := config.GetConfig().Elastic
+	index := fmt.Sprintf("%s-%s", elasticCfg.AlarmIndex, now.Format("2006.01.02"))
+	if err := s.solarRepo.BulkIndex(index, documents); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+	s.logger.Infof("GrowattAlarm(): saved %v alarms", len(documents))
 
 	return nil
 }
