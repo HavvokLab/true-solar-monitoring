@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/constant"
 	"github.com/HavvokLab/true-solar-monitoring/inverter/kstar"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
@@ -20,17 +22,22 @@ type KStarAlarmService interface {
 }
 
 type kstarAlarmService struct {
+	vendorType  string
+	solarRepo   repo.SolarRepo
 	snmpRepo    repo.SnmpRepo
 	redisClient *redis.Client
 	logger      logger.Logger
 }
 
 func NewKStarAlarmService(
+	solarRepo repo.SolarRepo,
 	snmpRepo repo.SnmpRepo,
 	redisClient *redis.Client,
 	logger logger.Logger,
 ) KStarAlarmService {
 	return &kstarAlarmService{
+		vendorType:  strings.ToUpper(constant.VENDOR_TYPE_KSTAR),
+		solarRepo:   solarRepo,
 		snmpRepo:    snmpRepo,
 		redisClient: redisClient,
 		logger:      logger,
@@ -68,6 +75,7 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 
 	deviceCount := 1
 	deviceSize := len(deviceList)
+	documents := make([]interface{}, 0)
 	for _, device := range deviceList {
 		deviceID := device.GetID()
 		deviceName := device.GetName()
@@ -94,6 +102,7 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 		}
 
 		if device.Status != nil {
+			var document interface{}
 			switch *device.Status {
 			case 0:
 				key := fmt.Sprintf("Kstar,%s,%s,%s,%s", plantID, deviceID, deviceName, "Kstar-Disconnect")
@@ -105,11 +114,13 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 
 				alarmName := "Kstar-Disconnect"
 				payload := fmt.Sprintf("Kstar,%s,%s,%s", plantID, deviceID, deviceName)
+				document = model.NewSnmpAlarmItem(s.vendorType, plantName, alarmName, payload, constant.MAJOR_SEVERITY, saveTime)
 				if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, payload, constant.MAJOR_SEVERITY, saveTime); err != nil {
 					s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 					return err
 				}
 
+				documents = append(documents, document)
 				s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, plantName, alarmName, payload, constant.MAJOR_SEVERITY, saveTime)
 			case 1:
 				realtimeAlarmResp, err := client.GetRealtimeAlarmListOfDevice(deviceID)
@@ -121,10 +132,12 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 				if len(realtimeAlarmResp.Data) > 0 {
 					alarmName := "Kstar-Disconnect"
 					payload := fmt.Sprintf("Kstar,%s,%s,%s", plantID, deviceID, deviceName)
+					document = model.NewSnmpAlarmItem(s.vendorType, plantName, alarmName, payload, constant.MAJOR_SEVERITY, saveTime)
 					if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, payload, constant.CLEAR_SEVERITY, saveTime); err != nil {
 						s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 						return err
 					}
+					documents = append(documents, document)
 
 					if err := s.redisClient.Del(ctx, alarmName).Err(); err != nil {
 						s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
@@ -143,11 +156,13 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 						}
 
 						payload := fmt.Sprintf("Kstar,%s,%s,%s", plantID, deviceID, deviceName)
+						document = model.NewSnmpAlarmItem(s.vendorType, plantName, alarmName, payload, constant.MAJOR_SEVERITY, saveTime)
 						if err := s.snmpRepo.SendAlarmTrap(plantName, alarmMessage, payload, constant.MAJOR_SEVERITY, alarmTime); err != nil {
 							s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 							return err
 						}
 
+						documents = append(documents, document)
 						s.logger.Infof("[%v] - SendAlarmTrap(): plant: %v, alarm: %v, payload: %v, severity: %v, lastedUpdatedTime: %v", credential.Username, plantName, alarmMessage, payload, constant.MAJOR_SEVERITY, alarmTime)
 					}
 					continue
@@ -187,6 +202,7 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 						plantName := splitVal[0]
 						alarmName := strings.ReplaceAll(splitKey[4], " ", "-")
 						payload := fmt.Sprintf("Kstar,%s,%s,%s", plantID, deviceID, deviceName)
+						document = model.NewSnmpAlarmItem(s.vendorType, plantName, alarmName, payload, constant.CLEAR_SEVERITY, splitVal[1])
 						if err := s.snmpRepo.SendAlarmTrap(plantName, alarmName, payload, constant.CLEAR_SEVERITY, splitVal[1]); err != nil {
 							s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 							return err
@@ -220,16 +236,26 @@ func (s *kstarAlarmService) Run(credential *model.KStarCredential) error {
 						}
 
 						payload := fmt.Sprintf("Kstar,%s,%s,%s", plantID, deviceID, deviceName)
+						document = model.NewSnmpAlarmItem(s.vendorType, plantName, alarmMessage, payload, constant.MAJOR_SEVERITY, alarmTime)
 						if err := s.snmpRepo.SendAlarmTrap(plantName, alarmMessage, payload, constant.MAJOR_SEVERITY, alarmTime); err != nil {
 							s.logger.Errorf("[%v] - KStarAlarmService.Run(): %v", credential.Username, err)
 							return err
 						}
+						documents = append(documents, document)
 					}
 				}
 			default:
 			}
 		}
 	}
+
+	elasticCfg := config.GetConfig().Elastic
+	index := fmt.Sprintf("%s-%s", elasticCfg.AlarmIndex, time.Now().Format("2006.01.02"))
+	if err := s.solarRepo.BulkIndex(index, documents); err != nil {
+		s.logger.Error(err)
+		return err
+	}
+	s.logger.Infof("GrowattAlarm(): saved %v alarms", len(documents))
 
 	return nil
 }

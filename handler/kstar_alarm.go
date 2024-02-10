@@ -76,7 +76,14 @@ func (h *KStarAlarmHandler) run(credential *model.KStarCredential) func() {
 		}
 		defer rdb.Close()
 
-		serv := service.NewKStarAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewKStarAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return
@@ -134,7 +141,14 @@ func (h *KStarAlarmHandler) mock(credential *model.KStarCredential) func() {
 		}
 		defer rdb.Close()
 
-		serv := service.NewKStarAlarmService(snmpRepo, rdb, h.logger)
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			return
+		}
+		solarRepo := repo.NewSolarRepo(elastic)
+
+		serv := service.NewKStarAlarmService(solarRepo, snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return
