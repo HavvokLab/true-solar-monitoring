@@ -1,17 +1,17 @@
 package util
 
-import "github.com/bytedance/sonic"
+import "encoding/json"
 
 func Recast(from, to interface{}) error {
 	switch v := from.(type) {
 	case []byte:
-		return sonic.Unmarshal(v, to)
+		return json.Unmarshal(v, to)
 	default:
-		buf, err := sonic.Marshal(from)
+		buf, err := json.Marshal(from)
 		if err != nil {
 			return err
 		}
 
-		return sonic.Unmarshal(buf, to)
+		return json.Unmarshal(buf, to)
 	}
 }

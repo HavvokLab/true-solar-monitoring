@@ -2,12 +2,12 @@ package huawei
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 
 	"github.com/HavvokLab/true-solar-monitoring/util"
 	"github.com/avast/retry-go"
-	"github.com/bytedance/sonic"
 )
 
 func prepareHttpRequest(method, url string, headers map[string]string, data interface{}) (*http.Request, error) {
@@ -15,7 +15,7 @@ func prepareHttpRequest(method, url string, headers map[string]string, data inte
 	var err error
 
 	if data != nil {
-		encoded_data, err := sonic.Marshal(data)
+		encoded_data, err := json.Marshal(data)
 		if err != nil {
 			return nil, err
 		}
