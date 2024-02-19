@@ -60,7 +60,6 @@ func (s monthlyProductionService) DailyRun() error {
 	if end.Day() > 1 {
 		if err := s.solarRepo.DeleteIndex(index); err != nil {
 			s.logger.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), err)
-			return err
 		}
 		s.logger.Infof("[%v]MonthlyProduction.Run(): index %q deleted", index)
 	}
