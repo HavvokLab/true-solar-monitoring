@@ -33,7 +33,7 @@ func NewMonthlyProductionService(solarRepo repo.SolarRepo, masterSiteRepo repo.M
 
 func (s monthlyProductionService) DailyRun() error {
 	now := time.Now()
-	var end time.Time = now.AddDate(0, 0, -1)
+	var end time.Time = now
 	var start time.Time = time.Date(end.Year(), end.Month(), 1, 0, 0, 0, 0, time.Local)
 
 	defer func() {
