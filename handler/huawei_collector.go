@@ -55,7 +55,7 @@ func (h *HuaweiCollectorHandler) Run() {
 		case 1:
 			pool.Submit(h.runVersion1(&clone))
 		case 2:
-			// pool.Submit(h.runVersion2(&clone))
+			pool.Submit(h.runVersion2(&clone))
 		default:
 			// do nothing
 		}
@@ -112,8 +112,9 @@ func (h *HuaweiCollectorHandler) runVersion2(credential *model.HuaweiCredential)
 			return
 		}
 		siteRegionRepo := repo.NewSiteRegionMappingRepo(db)
+		huaweiAltervimRepo := repo.NewHuaweiAltervimRepo(db)
 
-		serv := service.NewHuaweiCollectorV2Service(solarRepo, siteRegionRepo, h.logger)
+		serv := service.NewHuaweiCollectorV3Service(huaweiAltervimRepo, solarRepo, siteRegionRepo, h.logger)
 		if err != nil {
 			h.logger.Errorf("[%v]Failed to create service", credential.Username)
 			return
