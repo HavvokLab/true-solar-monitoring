@@ -274,7 +274,7 @@ func (s *growattCollectorService) run(credential *model.GrowattCredential, docum
 
 					if overviewInfoResp.Data.MonthlyEnergy != nil {
 						if parsed, err := strconv.ParseFloat(overviewInfoResp.Data.GetMonthlyEnergy(), 64); err == nil {
-							plantItem.DailyProduction = &parsed
+							plantItem.MonthlyProduction = &parsed
 
 							if co2WeightPerKWh != nil {
 								plantItem.MonthlyCO2 = pointy.Float64(parsed * pointy.Float64Value(co2WeightPerKWh, 0.0))
