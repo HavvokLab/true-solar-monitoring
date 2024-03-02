@@ -13,14 +13,15 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/logger"
 	"github.com/HavvokLab/true-solar-monitoring/model"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
+	"github.com/HavvokLab/true-solar-monitoring/util"
 	"go.openly.dev/pointy"
 )
 
-type HuaweiCollectorService interface {
+type HuaweiTroubleShootService interface {
 	Run(*model.HuaweiCredential) error
 }
 
-type huaweiCollectorService struct {
+type huaweiTroubleShootService struct {
 	vendorType     string
 	siteRegionRepo repo.SiteRegionMappingRepo
 	siteRegions    []model.SiteRegionMapping
@@ -29,8 +30,8 @@ type huaweiCollectorService struct {
 	logger         logger.Logger
 }
 
-func NewHuaweiCollectorService(solarRepo repo.SolarRepo, siteRegionRepo repo.SiteRegionMappingRepo, logger logger.Logger) HuaweiCollectorService {
-	return &huaweiCollectorService{
+func NewHuaweiTroubleShootService(solarRepo repo.SolarRepo, siteRegionRepo repo.SiteRegionMappingRepo, logger logger.Logger) HuaweiTroubleShootService {
+	return &huaweiTroubleShootService{
 		vendorType:     strings.ToUpper(constant.VENDOR_TYPE_HUAWEI),
 		siteRegionRepo: siteRegionRepo,
 		solarRepo:      solarRepo,
@@ -40,16 +41,16 @@ func NewHuaweiCollectorService(solarRepo repo.SolarRepo, siteRegionRepo repo.Sit
 	}
 }
 
-func (s *huaweiCollectorService) Run(credential *model.HuaweiCredential) error {
+func (s *huaweiTroubleShootService) Run(credential *model.HuaweiCredential) error {
 	defer func() {
 		if r := recover(); r != nil {
-			s.logger.Warnf("[%v] - HuaweiCollectorService.Run(): %v", credential.Username, r)
+			s.logger.Warnf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, r)
 		}
 	}()
 
 	siteRegions, err := s.siteRegionRepo.GetSiteRegionMappings()
 	if err != nil {
-		s.logger.Errorf("[%v] - HuaweiCollectorService.Run(): %v", credential.Username, err)
+		s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
 		return err
 	}
 	s.siteRegions = siteRegions
@@ -59,7 +60,8 @@ func (s *huaweiCollectorService) Run(credential *model.HuaweiCredential) error {
 	doneCh := make(chan bool)
 	errorCh := make(chan error)
 	documentCh := make(chan interface{})
-	go s.run(credential, documentCh, doneCh, errorCh)
+	date := time.Date(2023, time.November, 20, 0, 0, 0, 0, time.Local)
+	go s.run(credential, date, documentCh, doneCh, errorCh)
 
 DONE:
 	for {
@@ -67,7 +69,7 @@ DONE:
 		case <-doneCh:
 			break DONE
 		case err := <-errorCh:
-			s.logger.Errorf("[%v] - HuaweiCollectorService.Run(): %v", credential.Username, err)
+			s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
 			return err
 		case document := <-documentCh:
 			documents = append(documents, document)
@@ -88,18 +90,20 @@ DONE:
 		}
 	}
 
-	collectorIndex := fmt.Sprintf("%s-%s", s.elasticConfig.SolarIndex, time.Now().Format("2006.01.02"))
-	if err := s.solarRepo.BulkIndex(collectorIndex, documents); err != nil {
-		s.logger.Errorf("[%v] - HuaweiCollectorService.Run(): %v", credential.Username, err)
-		return err
-	}
-	s.logger.Infof("[%v] - HuaweiCollectorService.Run(): %v documents indexed", credential.Username, len(documents))
+	// collectorIndex := fmt.Sprintf("%s-%s", s.elasticConfig.SolarIndex, time.Now().Format("2006.01.02"))
+	// if err := s.solarRepo.BulkIndex(collectorIndex, documents); err != nil {
+	// 	s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
+	// 	return err
+	// }
+	util.PrintJSON(map[string]any{"result": documents})
+	s.logger.Infof("[%v] - HuaweiTroubleShootService.Run(): %v documents indexed", credential.Username, len(documents))
 
-	if err := s.solarRepo.UpsertSiteStation(siteDocuments); err != nil {
-		s.logger.Errorf("[%v] - HuaweiCollectorService.Run(): %v", credential.Username, err)
-		return err
-	}
-	s.logger.Infof("[%v] - HuaweiCollectorService.Run(): %v site stations upserted", credential.Username, len(siteDocuments))
+	// if err := s.solarRepo.UpsertSiteStation(siteDocuments); err != nil {
+	// 	s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
+	// 	return err
+	// }
+	util.PrintJSON(map[string]any{"result": siteDocuments})
+	s.logger.Infof("[%v] - HuaweiTroubleShootService.Run(): %v site stations upserted", credential.Username, len(siteDocuments))
 
 	close(doneCh)
 	close(errorCh)
@@ -111,10 +115,9 @@ DONE:
 // monthly production
 // daily production
 
-func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documentCh chan interface{}, doneCh chan bool, errorCh chan error) {
-	now := time.Now()
-	beginTime := time.Date(now.Year(), now.Month(), now.Day(), 6, 0, 0, 0, now.Location()).UnixNano() / 1e6
-	collectTime := now.UnixNano() / 1e6
+func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date time.Time, documentCh chan interface{}, doneCh chan bool, errorCh chan error) {
+	beginTime := time.Date(date.Year(), date.Month(), date.Day(), 6, 0, 0, 0, date.Location()).UnixNano() / 1e6
+	collectTime := date.UnixNano() / 1e6
 
 	client, err := huawei.NewHuaweiClient(&huawei.HuaweiCredential{
 		Username: credential.Username,
@@ -150,7 +153,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 	stationCodeListString = append(stationCodeListString, strings.Join(stationCodeList, ","))
 
 	var inverterList []huawei.DeviceItem
-	mapPlantCodeToRealtimeData := make(map[string]huawei.RealtimePlantData)
+	// mapPlantCodeToRealtimeData := make(map[string]huawei.RealtimePlantData)
 	mapPlantCodeToDailyData := make(map[string]huawei.HistoricalPlantData)
 	mapPlantCodeToMonthlyData := make(map[string]huawei.HistoricalPlantData)
 	mapPlantCodeToYearlyPower := make(map[string]float64)
@@ -159,18 +162,18 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 	mapPlantCodeToDevice := make(map[string][]huawei.DeviceItem)
 	mapDeviceSNToAlarm := make(map[string][]huawei.DeviceAlarmItem)
 	for _, stationCode := range stationCodeListString {
-		realtimePlantDataResp, err := client.GetRealtimePlantData(stationCode)
-		if err != nil {
-			s.logger.Error(err)
-			errorCh <- err
-			return
-		}
+		// realtimePlantDataResp, err := client.GetRealtimePlantData(stationCode)
+		// if err != nil {
+		// 	s.logger.Error(err)
+		// 	errorCh <- err
+		// 	return
+		// }
 
-		for _, item := range realtimePlantDataResp.Data {
-			if item.Code != nil {
-				mapPlantCodeToRealtimeData[item.GetCode()] = *item
-			}
-		}
+		// for _, item := range realtimePlantDataResp.Data {
+		// 	if item.Code != nil {
+		// 		mapPlantCodeToRealtimeData[item.GetCode()] = *item
+		// 	}
+		// }
 
 		dailyPlantDataResp, err := client.GetDailyPlantData(stationCode, collectTime)
 		if err != nil {
@@ -181,7 +184,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 
 		for _, item := range dailyPlantDataResp.Data {
 			if item.Code != nil {
-				if now.Format("2006-01-02") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01-02") {
+				if date.Format("2006-01-02") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01-02") {
 					mapPlantCodeToDailyData[item.GetCode()] = *item
 				}
 			}
@@ -196,7 +199,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 
 		for _, item := range monthlyPlantDataResp.Data {
 			if item.Code != nil {
-				if now.Format("2006-01") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01") {
+				if date.Format("2006-01") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01") {
 					mapPlantCodeToMonthlyData[item.GetCode()] = *item
 				}
 				mapPlantCodeToYearlyPower[item.GetCode()] = mapPlantCodeToYearlyPower[item.GetCode()] + item.DataItemMap.GetInverterPower()
@@ -278,23 +281,23 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 	}
 	inverterIDListString = append(inverterIDListString, strings.Join(inverterIDList, ","))
 
-	mapDeviceToRealtimeData := make(map[int]huawei.RealtimeDeviceData)
+	// mapDeviceToRealtimeData := make(map[int]huawei.RealtimeDeviceData)
 	mapDeviceToDailyData := make(map[int]huawei.HistoricalDeviceData)
 	mapDeviceToMonthlyData := make(map[int]huawei.HistoricalDeviceData)
 	mapDeviceToYearlyPower := make(map[int]float64)
 	for _, deviceID := range inverterIDListString {
-		realtimeDeviceDataResp, err := client.GetRealtimeDeviceData(deviceID, "1")
-		if err != nil {
-			s.logger.Error(err)
-			errorCh <- err
-			return
-		}
+		// realtimeDeviceDataResp, err := client.GetRealtimeDeviceData(deviceID, "1")
+		// if err != nil {
+		// 	s.logger.Error(err)
+		// 	errorCh <- err
+		// 	return
+		// }
 
-		for _, item := range realtimeDeviceDataResp.Data {
-			if item.ID != nil {
-				mapDeviceToRealtimeData[item.GetID()] = *item
-			}
-		}
+		// for _, item := range realtimeDeviceDataResp.Data {
+		// 	if item.ID != nil {
+		// 		mapDeviceToRealtimeData[item.GetID()] = *item
+		// 	}
+		// }
 
 		dailyDeviceDataResp, err := client.GetDailyDeviceData(deviceID, "1", collectTime)
 		if err != nil {
@@ -305,7 +308,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 
 		for _, item := range dailyDeviceDataResp.Data {
 			if item.ID != nil {
-				if now.Format("2006-01-02") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01-02") {
+				if date.Format("2006-01-02") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01-02") {
 					deviceID := item.GetID()
 					switch deviceID := deviceID.(type) {
 					case float64:
@@ -331,7 +334,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 				case float64:
 					parsedDeviceID := int(deviceID)
 					mapDeviceToYearlyPower[parsedDeviceID] = mapDeviceToYearlyPower[parsedDeviceID] + item.DataItemMap.GetProductPower()
-					if now.Format("2006-01") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01") {
+					if date.Format("2006-01") == time.Unix(item.GetCollectTime()/1e3, 0).Format("2006-01") {
 						mapDeviceToMonthlyData[parsedDeviceID] = *item
 					}
 				default:
@@ -356,7 +359,8 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 		var longitude *float64
 		var location *string
 		currentPower := 0.0
-		plantStatus := huawei.HuaweiMapDeviceStatus[mapPlantCodeToRealtimeData[stationCode].DataItemMap.GetRealHealthState()]
+		// plantStatus := huawei.HuaweiMapDeviceStatus[mapPlantCodeToRealtimeData[stationCode].DataItemMap.GetRealHealthState()]
+		var plantStatus string = "UNKNOWN"
 
 		deviceCount := 1
 		deviceSize := len(mapPlantCodeToDevice[stationCode])
@@ -372,21 +376,21 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 			}
 
 			var deviceStatus *int
-			if mapDeviceToRealtimeData[deviceID].DataItemMap != nil {
-				if mapDeviceToRealtimeData[deviceID].DataItemMap.Status != nil {
-					deviceStatus = mapDeviceToRealtimeData[deviceID].DataItemMap.Status
-				}
-			}
+			// if mapDeviceToRealtimeData[deviceID].DataItemMap != nil {
+			// 	if mapDeviceToRealtimeData[deviceID].DataItemMap.Status != nil {
+			// 		deviceStatus = mapDeviceToRealtimeData[deviceID].DataItemMap.Status
+			// 	}
+			// }
 
 			if len(mapDeviceSNToAlarm[deviceSN]) > 0 {
 				deviceStatus = pointy.Int(2)
 
 				for _, deviceAlarm := range mapDeviceSNToAlarm[deviceSN] {
 					alarmItem := model.AlarmItem{
-						Timestamp:    now,
-						Month:        now.Format("01"),
-						Year:         now.Format("2006"),
-						MonthYear:    now.Format("01-2006"),
+						Timestamp:    date,
+						Month:        date.Format("01"),
+						Year:         date.Format("2006"),
+						MonthYear:    date.Format("01-2006"),
 						VendorType:   s.vendorType,
 						DataType:     constant.DATA_TYPE_ALARM,
 						Area:         cityArea,
@@ -419,10 +423,10 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 			}
 
 			deviceItem := model.DeviceItem{
-				Timestamp:      now,
-				Month:          now.Format("01"),
-				Year:           now.Format("2006"),
-				MonthYear:      now.Format("01-2006"),
+				Timestamp:      date,
+				Month:          date.Format("01"),
+				Year:           date.Format("2006"),
+				MonthYear:      date.Format("01-2006"),
 				VendorType:     s.vendorType,
 				DataType:       constant.DATA_TYPE_DEVICE,
 				Area:           cityArea,
@@ -465,9 +469,9 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 				deviceItem.DeviceType = pointy.String(huawei.HuaweiMapDeviceType[*device.TypeID])
 
 				if device.GetTypeID() == 1 {
-					if mapDeviceToRealtimeData[deviceID].DataItemMap != nil {
-						deviceItem.TotalPowerGeneration = pointy.Float64(mapDeviceToRealtimeData[deviceID].DataItemMap.GetTotalEnergy())
-					}
+					// if mapDeviceToRealtimeData[deviceID].DataItemMap != nil {
+					// 	deviceItem.TotalPowerGeneration = pointy.Float64(mapDeviceToRealtimeData[deviceID].DataItemMap.GetTotalEnergy())
+					// }
 
 					if mapDeviceToDailyData[deviceID].DataItemMap != nil {
 						deviceItem.DailyPowerGeneration = pointy.Float64(mapDeviceToDailyData[deviceID].DataItemMap.GetProductPower())
@@ -479,7 +483,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 
 					deviceItem.YearlyPowerGeneration = pointy.Float64(mapDeviceToYearlyPower[deviceID])
 
-					currentPower += mapDeviceToRealtimeData[deviceID].DataItemMap.GetActivePower()
+					// currentPower += mapDeviceToRealtimeData[deviceID].DataItemMap.GetActivePower()
 					latitude = deviceItem.Latitude
 					longitude = deviceItem.Longitude
 				}
@@ -504,10 +508,10 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 		}
 
 		plantItem := model.PlantItem{
-			Timestamp:         now,
-			Month:             now.Format("01"),
-			Year:              now.Format("2006"),
-			MonthYear:         now.Format("01-2006"),
+			Timestamp:         date,
+			Month:             date.Format("01"),
+			Year:              date.Format("2006"),
+			MonthYear:         date.Format("01-2006"),
 			VendorType:        s.vendorType,
 			DataType:          constant.DATA_TYPE_PLANT,
 			Area:              cityArea,
@@ -526,7 +530,7 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 			InstalledCapacity: pointy.Float64(station.GetCapacity() * 1000),
 			TotalCO2:          pointy.Float64(mapPlantCodeToTotalCO2[stationCode] * 1000),
 			MonthlyCO2:        &monthlyCO2,
-			TotalSavingPrice:  mapPlantCodeToRealtimeData[stationCode].DataItemMap.TotalIncome,
+			TotalSavingPrice:  nil,
 			Currency:          pointy.String(huawei.HUAWEI_CURRENCY_USD),
 			CurrentPower:      pointy.Float64(currentPower),
 			DailyProduction:   &dailyProduction,
@@ -534,15 +538,18 @@ func (s *huaweiCollectorService) run(credential *model.HuaweiCredential, documen
 			YearlyProduction:  pointy.Float64(mapPlantCodeToYearlyPower[stationCode]),
 			PlantStatus:       pointy.String(plantStatus),
 			Owner:             credential.Owner,
+			TotalProduction:   pointy.Float64(mapPlantCodeToTotalPower[stationCode]),
 		}
 
-		plantItem.TotalProduction = mapPlantCodeToRealtimeData[stationCode].DataItemMap.TotalPower
-		if pointy.Float64Value(plantItem.TotalProduction, 0.0) < pointy.Float64Value(plantItem.YearlyProduction, 0.0) {
-			plantItem.TotalProduction = pointy.Float64(mapPlantCodeToTotalPower[stationCode])
-		}
+		// plantItem.TotalProduction = pointy.Float64(mapPlantCodeToTotalPower[stationCode])
+		// plantItem.TotalProduction = mapPlantCodeToRealtimeData[stationCode].DataItemMap.TotalPower
+		// if pointy.Float64Value(plantItem.TotalProduction, 0.0) < pointy.Float64Value(plantItem.YearlyProduction, 0.0) {
+		// 	plantItem.TotalProduction = pointy.Float64(mapPlantCodeToTotalPower[stationCode])
+		// }
 
 		documentCh <- plantItem
 	}
 
 	doneCh <- true
+
 }
