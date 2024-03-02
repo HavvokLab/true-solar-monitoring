@@ -14,6 +14,7 @@ import (
 	"github.com/HavvokLab/true-solar-monitoring/model"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
 	"github.com/HavvokLab/true-solar-monitoring/util"
+	"github.com/schollz/progressbar/v3"
 	"go.openly.dev/pointy"
 )
 
@@ -151,6 +152,7 @@ func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date
 		}
 	}
 	stationCodeListString = append(stationCodeListString, strings.Join(stationCodeList, ","))
+	fmt.Println(stationCodeListString)
 
 	var inverterList []huawei.DeviceItem
 	// mapPlantCodeToRealtimeData := make(map[string]huawei.RealtimePlantData)
@@ -161,6 +163,7 @@ func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date
 	mapPlantCodeToTotalCO2 := make(map[string]float64)
 	mapPlantCodeToDevice := make(map[string][]huawei.DeviceItem)
 	mapDeviceSNToAlarm := make(map[string][]huawei.DeviceAlarmItem)
+	bar := progressbar.Default(int64(len(stationCodeListString)))
 	for _, stationCode := range stationCodeListString {
 		// realtimePlantDataResp, err := client.GetRealtimePlantData(stationCode)
 		// if err != nil {
@@ -264,6 +267,8 @@ func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date
 				}
 			}
 		}
+
+		bar.Add(1)
 	}
 
 	s.logger.Infof("[%v] - HuaweiCollectorService.run(): start preparing device data", credential.Username)
