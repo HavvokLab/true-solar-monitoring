@@ -20,7 +20,16 @@ func init() {
 
 func main() {
 	credential := model.HuaweiCredential{Username: "trueapi", Password: "Trueapi12@"}
-	logger := logger.NewLogger(&logger.LoggerOption{})
+	logger := logger.NewLogger(&logger.LoggerOption{
+		LogName:     "huawei_troubleshoot",
+		LogSize:     1024,
+		LogAge:      90,
+		LogBackup:   1,
+		LogCompress: false,
+		LogLevel:    logger.LOG_LEVEL_DEBUG,
+		SkipCaller:  1,
+	})
+
 	elastic, err := infra.NewElasticsearch()
 	if err != nil {
 		logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
