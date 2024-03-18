@@ -19,7 +19,7 @@ import (
 )
 
 type HuaweiTroubleShootService interface {
-	Run(*model.HuaweiCredential) error
+	Run(*model.HuaweiCredential, time.Time) error
 }
 
 type huaweiTroubleShootService struct {
@@ -42,7 +42,7 @@ func NewHuaweiTroubleShootService(solarRepo repo.SolarRepo, siteRegionRepo repo.
 	}
 }
 
-func (s *huaweiTroubleShootService) Run(credential *model.HuaweiCredential) error {
+func (s *huaweiTroubleShootService) Run(credential *model.HuaweiCredential, date time.Time) error {
 	defer func() {
 		if r := recover(); r != nil {
 			s.logger.Warnf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, r)
@@ -61,7 +61,6 @@ func (s *huaweiTroubleShootService) Run(credential *model.HuaweiCredential) erro
 	doneCh := make(chan bool)
 	errorCh := make(chan error)
 	documentCh := make(chan interface{})
-	date := time.Date(2023, time.November, 20, 0, 0, 0, 0, time.Local)
 	go s.run(credential, date, documentCh, doneCh, errorCh)
 
 DONE:
@@ -91,19 +90,18 @@ DONE:
 		}
 	}
 
-	// collectorIndex := fmt.Sprintf("%s-%s", s.elasticConfig.SolarIndex, time.Now().Format("2006.01.02"))
-	// if err := s.solarRepo.BulkIndex(collectorIndex, documents); err != nil {
-	// 	s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
-	// 	return err
-	// }
-	util.PrintJSON(map[string]any{"result": documents})
+	collectorIndex := fmt.Sprintf("%s-%s", s.elasticConfig.SolarIndex, time.Now().Format("2006.01.02"))
+	if err := s.solarRepo.BulkIndex(collectorIndex, documents); err != nil {
+		s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
+		return err
+	}
+	util.PrintJSON(map[string]any{"x": documents})
 	s.logger.Infof("[%v] - HuaweiTroubleShootService.Run(): %v documents indexed", credential.Username, len(documents))
 
-	// if err := s.solarRepo.UpsertSiteStation(siteDocuments); err != nil {
-	// 	s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
-	// 	return err
-	// }
-	util.PrintJSON(map[string]any{"result": siteDocuments})
+	if err := s.solarRepo.UpsertSiteStation(siteDocuments); err != nil {
+		s.logger.Errorf("[%v] - HuaweiTroubleShootService.Run(): %v", credential.Username, err)
+		return err
+	}
 	s.logger.Infof("[%v] - HuaweiTroubleShootService.Run(): %v site stations upserted", credential.Username, len(siteDocuments))
 
 	close(doneCh)
@@ -152,7 +150,15 @@ func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date
 		}
 	}
 	stationCodeListString = append(stationCodeListString, strings.Join(stationCodeList, ","))
-	fmt.Println(stationCodeListString)
+	stationCodeListString = []string{
+		"1EE1AD35E12342FDB55EBFD731670BF2",
+		"F71A1794DD944ECAB939B4870F620524",
+		"74D2DEF575B54CAFA3E019F076D89A04",
+		"20F6167E7F7742B4AE314E9E95CD269D",
+		"0EC8D3C28EEF4673A43FE38070B0E00A",
+		"A1825071B4CE4EEDA061B0FD677AFE07",
+		"NE=33727731",
+	}
 
 	var inverterList []huawei.DeviceItem
 	// mapPlantCodeToRealtimeData := make(map[string]huawei.RealtimePlantData)
@@ -163,7 +169,7 @@ func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date
 	mapPlantCodeToTotalCO2 := make(map[string]float64)
 	mapPlantCodeToDevice := make(map[string][]huawei.DeviceItem)
 	mapDeviceSNToAlarm := make(map[string][]huawei.DeviceAlarmItem)
-	bar := progressbar.Default(int64(len(stationCodeListString)))
+	bar := progressbar.Default(int64(len(stationCodeListString)), "plant progressing")
 	for _, stationCode := range stationCodeListString {
 		// realtimePlantDataResp, err := client.GetRealtimePlantData(stationCode)
 		// if err != nil {
@@ -290,6 +296,7 @@ func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date
 	mapDeviceToDailyData := make(map[int]huawei.HistoricalDeviceData)
 	mapDeviceToMonthlyData := make(map[int]huawei.HistoricalDeviceData)
 	mapDeviceToYearlyPower := make(map[int]float64)
+	deviceBar := progressbar.Default(int64(len(inverterIDListString)), "device progress")
 	for _, deviceID := range inverterIDListString {
 		// realtimeDeviceDataResp, err := client.GetRealtimeDeviceData(deviceID, "1")
 		// if err != nil {
@@ -346,6 +353,8 @@ func (s *huaweiTroubleShootService) run(credential *model.HuaweiCredential, date
 				}
 			}
 		}
+
+		deviceBar.Add(1)
 	}
 
 	s.logger.Infof("[%v] - HuaweiCollectorService.run(): start preparing documents", credential.Username)

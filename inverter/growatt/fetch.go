@@ -84,8 +84,14 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 		if err := util.Recast(resBody, &result); err != nil {
 			errResp := ErrorResponse{}
 			if err := util.Recast(resBody, &errResp); err != nil {
-				fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
-				return err
+				errMap := make(map[string]interface{})
+				if err := util.Recast(resBody, &errMap); err != nil {
+					fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
+					return err
+				}
+
+				fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), errMap)
+				return fmt.Errorf("%+v", errMap)
 			}
 
 			fmt.Printf("[%v] %v\n", errResp.GetErrorCode(), errResp.GetErrorMsg())

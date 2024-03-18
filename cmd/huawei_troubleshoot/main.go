@@ -1,6 +1,10 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"time"
+
 	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/infra"
 	"github.com/HavvokLab/true-solar-monitoring/logger"
@@ -19,6 +23,12 @@ func init() {
 }
 
 func main() {
+	now := time.Now()
+	startStr := flag.String("start", now.Format("2006-01-02"), "start troubleshoot date")
+	endStr := flag.String("end", now.Format("2006-01-02"), "end troubleshoot date")
+	flag.Parse()
+	fmt.Println(*startStr, *endStr)
+
 	credential := model.HuaweiCredential{Username: "trueapi", Password: "Trueapi12@"}
 	logger := logger.NewLogger(&logger.LoggerOption{
 		LogName:     "huawei_troubleshoot",
@@ -44,7 +54,17 @@ func main() {
 	}
 	siteRegionRepo := repo.NewSiteRegionMappingRepo(db)
 	serv := service.NewHuaweiTroubleShootService(solarRepo, siteRegionRepo, logger)
-	if err := serv.Run(&credential); err != nil {
-		panic(err)
+	date, _ := time.Parse("2006-01-02", *startStr)
+	for {
+		logger.Infof("troubleshooting on date %v", date.Format("2006-01-02"))
+		if err := serv.Run(&credential, date); err != nil {
+			logger.Errorf("error troubleshoot on date %v", date.Format("2006-01-02"))
+		}
+
+		if date.Format("2006-01-02") == *endStr {
+			logger.Info("finished troubleshoot")
+			break
+		}
+		date = date.AddDate(0, 0, 1)
 	}
 }

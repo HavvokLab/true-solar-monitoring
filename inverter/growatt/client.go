@@ -37,6 +37,9 @@ type GrowattClient interface {
 	GetHpsAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetHpsAlertListResponse, error)
 	GetPbdAlertList(deviceSN string, timestamp int64) ([]*AlarmItem, error)
 	GetPbdAlertListWithPagination(deviceSN string, timestamp int64, page, size int) (*GetPbdAlertListResponse, error)
+	GetHistoricalPlantPowerGenerationWithPagination(plantId int, start, end int64, unit string, page, size int) (*GetHistoricalPlantPowerGenerationResponse, error)
+	GetPlantBasicInfo(plantID int) (*GetPlantBasicInfoResponse, error)
+	GetHistoricalPlantPowerGeneration(plantId int, start, end int64, unit string) ([]HistoricalPlantPowerGenerationEnergy, error)
 }
 
 type growattClient struct {
@@ -65,6 +68,9 @@ func NewGrowattClient(credential *GrowattCredential) (GrowattClient, error) {
 
 	return client, nil
 }
+
+// TODO: /device/inverter/data -> Historical data of an inverter
+// TODO: /plant/energy -> Historical Plant Power Generation
 
 func (r *growattClient) GetPlantListWithPagination(page, size int) (*GetPlantListResponse, error) {
 	queryMap := map[string]interface{}{
@@ -195,6 +201,7 @@ func (r *growattClient) GetPlantDeviceList(plantID int) ([]*DeviceItem, error) {
 	return devices, nil
 }
 
+// *un-used
 func (r *growattClient) GetRealtimeDeviceData(deviceSN string) (*GetRealtimeDeviceDataResponse, error) {
 	queryMap := map[string]interface{}{
 		"device_sn": deviceSN,
@@ -641,4 +648,72 @@ func (r *growattClient) GetPbdAlertList(deviceSN string, timestamp int64) ([]*Al
 	}
 
 	return alarms, nil
+}
+
+func (r *growattClient) GetHistoricalPlantPowerGenerationWithPagination(plantId int, start, end int64, unit string, page, size int) (*GetHistoricalPlantPowerGenerationResponse, error) {
+	queryMap := map[string]interface{}{
+		"plant_id":   plantId,
+		"start_date": time.Unix(start, 0).Format("2006-01-02"),
+		"end_date":   time.Unix(end, 0).Format("2006-01-02"),
+		"time_unit":  unit,
+		"page":       page,
+		"perpage":    size,
+	}
+
+	query := BuildQueryParams(queryMap)
+	url := r.URL + "/plant/energy" + query
+
+	req, err := prepareHttpRequest(http.MethodGet, url, r.headers, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, _, err := prepareHttpResponse[GetHistoricalPlantPowerGenerationResponse](req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (r *growattClient) GetHistoricalPlantPowerGeneration(plantId int, start, end int64, unit string) ([]HistoricalPlantPowerGenerationEnergy, error) {
+	result := make([]HistoricalPlantPowerGenerationEnergy, 0)
+
+	page := 1
+	for {
+		res, err := r.GetHistoricalPlantPowerGenerationWithPagination(plantId, start, end, unit, page, MAX_PAGE_SIZE)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, res.Data.Energys...)
+		if len(result) >= res.Data.GetCount() {
+			break
+		}
+
+		page += 1
+	}
+
+	return result, nil
+}
+func (r *growattClient) GetPlantBasicInfo(plantID int) (*GetPlantBasicInfoResponse, error) {
+	queryMap := map[string]interface{}{
+		"plant_id": plantID,
+	}
+
+	query := BuildQueryParams(queryMap)
+	url := r.URL + "/plant/details" + query
+
+	req, err := prepareHttpRequest(http.MethodGet, url, r.headers, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, _, err := prepareHttpResponse[GetPlantBasicInfoResponse](req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+
 }

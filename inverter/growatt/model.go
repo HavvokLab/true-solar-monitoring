@@ -1,6 +1,11 @@
 package growatt
 
-import "go.openly.dev/pointy"
+import (
+	"strconv"
+	"time"
+
+	"go.openly.dev/pointy"
+)
 
 type DefaultResponse struct {
 	ErrorCode *int    `json:"error_code,omitempty"`
@@ -3909,4 +3914,112 @@ func (p *PbdAlertData) GetPbdSN(defaultValue ...string) string {
 type GetPbdAlertListResponse struct {
 	DefaultResponse
 	Data *PbdAlertData `json:"data,omitempty"`
+}
+
+// |=> GetHistoricalPlantPowerGeneration
+type GetHistoricalPlantPowerGenerationResponse struct {
+	DefaultResponse
+	Data *GetHistoricalPlantPowerGenerationData `json:"data,omitempty"`
+}
+
+type GetHistoricalPlantPowerGenerationData struct {
+	Count    *int                                   `json:"count,omitempty"`
+	TimeUnit *string                                `json:"time_unit,omitempty"`
+	Energys  []HistoricalPlantPowerGenerationEnergy `json:"energys,omitempty"`
+}
+
+func (h GetHistoricalPlantPowerGenerationData) GetCount() int {
+	return pointy.IntValue(h.Count, 0)
+}
+
+func (h GetHistoricalPlantPowerGenerationData) GetTimeUnit(fallback ...string) string {
+	val := "day"
+	if len(fallback) > 0 {
+		val = fallback[0]
+	}
+	return pointy.StringValue(h.TimeUnit, val)
+}
+
+type HistoricalPlantPowerGenerationEnergy struct {
+	Date   any     `json:"date"`
+	Energy *string `json:"energy"`
+}
+
+func (h HistoricalPlantPowerGenerationEnergy) GetDate() *time.Time {
+	if h.Date == nil {
+		return nil
+	}
+
+	switch v := h.Date.(type) {
+	case *string:
+		date, err := time.Parse(*v, "2006-01-02")
+		if err != nil {
+			return nil
+		}
+		return &date
+	case int:
+		date := time.Date(v, 1, 1, 0, 0, 0, 0, time.Local)
+		return &date
+	default:
+		return nil
+	}
+}
+
+func (h HistoricalPlantPowerGenerationEnergy) GetEnergy() float64 {
+	if h.Energy == nil {
+		return 0
+	}
+
+	energy, err := strconv.ParseFloat(*h.Energy, 64)
+	if err != nil {
+		return 0
+	}
+
+	return energy
+}
+
+// |=> GetPlantBasicInfo
+type GetPlantBasicInfoResponse struct {
+	DefaultResponse
+	Data *GetPlantBasicInfoData `json:"data,omitempty"`
+}
+
+type GetPlantBasicInfoData struct {
+	Address1            *string  `json:"address1,omitempty"`
+	InstalledDcCapacity *string  `json:"installed_dc_capacity,omitempty"`
+	City                *string  `json:"city,omitempty"`
+	Longitude           *string  `json:"longitude,omitempty"`
+	Country             *string  `json:"country,omitempty"`
+	Latitude            *string  `json:"latitude,omitempty"`
+	Locale              *string  `json:"locale,omitempty"`
+	Currency            *string  `json:"currency,omitempty"`
+	Name                *string  `json:"name,omitempty"`
+	PeakPower           *float64 `json:"peak_power,omitempty"`
+}
+
+func (s GetPlantBasicInfoData) GetName(fallback ...string) string {
+	val := ""
+	if len(fallback) > 0 {
+		val = fallback[0]
+	}
+
+	return pointy.StringValue(s.Name, val)
+}
+
+func (s GetPlantBasicInfoData) GetLongitude(fallback ...string) string {
+	val := ""
+	if len(fallback) > 0 {
+		val = fallback[0]
+	}
+
+	return pointy.StringValue(s.Longitude, val)
+}
+
+func (s GetPlantBasicInfoData) GetLatitude(fallback ...string) string {
+	val := ""
+	if len(fallback) > 0 {
+		val = fallback[0]
+	}
+
+	return pointy.StringValue(s.Latitude, val)
 }

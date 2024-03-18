@@ -8,6 +8,7 @@ import (
 
 type PlantRepo interface {
 	FindAll() ([]*model.Plant, error)
+	FindOneByName(name string) (*model.Plant, error)
 	FindAllWithPagination(offset, limit int) ([]*model.Plant, error)
 	Create(*model.Plant) error
 	BatchCreate([]*model.Plant) error
@@ -112,4 +113,14 @@ func (r *plantRepo) BatchUpsertAvailable(plants []*model.Plant) error {
 	})
 
 	return err
+}
+
+func (r plantRepo) FindOneByName(name string) (*model.Plant, error) {
+	tx := r.db.Session(&gorm.Session{})
+	data := model.Plant{}
+	if err := tx.Find(&data, "name=?", name).Error; err != nil {
+		return nil, err
+	}
+
+	return &data, nil
 }

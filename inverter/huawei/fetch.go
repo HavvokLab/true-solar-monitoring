@@ -80,7 +80,9 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 	// decode response body
 	var result R
 	if err := util.Recast(resBody, &result); err != nil {
-		return nil, http.StatusInternalServerError, err
+		huaweiErr := ResponseData{}
+		util.Recast(resBody, &huaweiErr)
+		return nil, http.StatusInternalServerError, huaweiErr
 	}
 
 	return &result, res.StatusCode, nil

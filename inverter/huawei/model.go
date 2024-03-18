@@ -9,6 +9,10 @@ type ResponseData struct {
 	Message    *string      `json:"message,omitempty"`
 }
 
+func (d ResponseData) Error() string {
+	return *d.Message
+}
+
 func (d *ResponseData) GetSuccess(defaultValue ...bool) bool {
 	value := false
 	if len(defaultValue) > 0 {
