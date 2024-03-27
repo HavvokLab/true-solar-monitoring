@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/HavvokLab/true-solar-monitoring/util"
 	"github.com/avast/retry-go"
@@ -47,6 +48,9 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 		retry.Delay(RETRY_WAIT_TIME),
 		retry.Attempts(RETRY_ATTEMPT),
 		retry.DelayType(retry.FixedDelay),
+		retry.RetryIf(func(err error) bool {
+			return strings.EqualFold(err.Error(), fmt.Sprint(ERROR_FREQUENCY_ACCESS)) || strings.EqualFold(err.Error(), "too many request")
+		}),
 	}
 
 	var resp *http.Response
@@ -56,7 +60,7 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 		res, err := client.Do(req)
 		if err != nil {
 			fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
-			return err
+			return retry.Unrecoverable(err)
 		}
 		defer res.Body.Close()
 
@@ -68,17 +72,17 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 		resBody, err := io.ReadAll(res.Body)
 		if err != nil {
 			fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
-			return err
+			return retry.Unrecoverable(err)
 		}
 
 		if len(resBody) == 0 {
 			fmt.Printf("[ERROR] - %v: empty response\n", req.URL.String())
-			return errors.New("empty response")
+			return retry.Unrecoverable(errors.New("empty response"))
 		}
 
 		if err := checkHTMLResponse(resBody); err != nil {
 			fmt.Printf("[ERROR] - %v: html response\n", req.URL.String())
-			return err
+			return retry.Unrecoverable(err)
 		}
 
 		if err := util.Recast(resBody, &result); err != nil {
@@ -87,15 +91,15 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 				errMap := make(map[string]interface{})
 				if err := util.Recast(resBody, &errMap); err != nil {
 					fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
-					return err
+					return retry.Unrecoverable(err)
 				}
 
 				fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), errMap)
-				return fmt.Errorf("%+v", errMap)
+				return retry.Unrecoverable(fmt.Errorf("%+v", errMap))
 			}
 
 			fmt.Printf("[%v] %v\n", errResp.GetErrorCode(), errResp.GetErrorMsg())
-			return fmt.Errorf("[%v] %v", errResp.GetErrorCode(), errResp.GetErrorMsg())
+			return fmt.Errorf("%v", errResp.GetErrorCode())
 		}
 
 		return nil
@@ -111,3 +115,73 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 
 	return &result, http.StatusOK, nil
 }
+
+// func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
+// 	retryOptions := []retry.Option{
+// 		retry.Delay(RETRY_WAIT_TIME),
+// 		retry.Attempts(RETRY_ATTEMPT),
+// 		retry.DelayType(retry.FixedDelay),
+// 	}
+
+// 	var resp *http.Response
+// 	var result R
+// 	err := retry.Do(func() error {
+// 		client := &http.Client{}
+// 		res, err := client.Do(req)
+// 		if err != nil {
+// 			fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
+// 			return err
+// 		}
+// 		defer res.Body.Close()
+
+// 		if res.StatusCode == http.StatusTooManyRequests {
+// 			fmt.Printf("[ERROR] - %v: too many request\n", req.URL.String())
+// 			return errors.New("too many request")
+// 		}
+
+// 		resBody, err := io.ReadAll(res.Body)
+// 		if err != nil {
+// 			fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
+// 			return err
+// 		}
+
+// 		if len(resBody) == 0 {
+// 			fmt.Printf("[ERROR] - %v: empty response\n", req.URL.String())
+// 			return errors.New("empty response")
+// 		}
+
+// 		if err := checkHTMLResponse(resBody); err != nil {
+// 			fmt.Printf("[ERROR] - %v: html response\n", req.URL.String())
+// 			return err
+// 		}
+
+// 		if err := util.Recast(resBody, &result); err != nil {
+// 			errResp := ErrorResponse{}
+// 			if err := util.Recast(resBody, &errResp); err != nil {
+// 				errMap := make(map[string]interface{})
+// 				if err := util.Recast(resBody, &errMap); err != nil {
+// 					fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), err.Error())
+// 					return err
+// 				}
+
+// 				fmt.Printf("[ERROR] - %v: %#v\n", req.URL.String(), errMap)
+// 				return fmt.Errorf("%+v", errMap)
+// 			}
+
+// 			fmt.Printf("[%v] %v\n", errResp.GetErrorCode(), errResp.GetErrorMsg())
+// 			return fmt.Errorf("[%v] %v", errResp.GetErrorCode(), errResp.GetErrorMsg())
+// 		}
+
+// 		return nil
+// 	}, retryOptions...)
+
+// 	if err != nil {
+// 		if resp != nil {
+// 			return nil, resp.StatusCode, err
+// 		}
+
+// 		return nil, http.StatusInternalServerError, err
+// 	}
+
+// 	return &result, http.StatusOK, nil
+// }
