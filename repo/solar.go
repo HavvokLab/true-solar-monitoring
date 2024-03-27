@@ -633,6 +633,6 @@ func (r *solarRepo) DeleteIndex(index string) error {
 }
 
 func (r *solarRepo) DeleteDocumentInIndex(index, id string) error {
-	_, err := r.elastic.Delete().Index(index).Id(id).Do(context.Background())
+	_, err := r.elastic.DeleteByQuery(index).Query(elastic.NewBoolQuery().Must(elastic.NewTermQuery("_id", id))).Do(context.Background())
 	return err
 }
