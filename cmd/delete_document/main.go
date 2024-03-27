@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/HavvokLab/true-solar-monitoring/config"
 	"github.com/HavvokLab/true-solar-monitoring/infra"
 	"github.com/HavvokLab/true-solar-monitoring/repo"
@@ -22,7 +24,8 @@ func main() {
 	for _, id := range documentIds {
 		err := repo.DeleteDocumentInIndex("solarcell-2023.11.*", id)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
+		fmt.Printf("Document with id %s deleted\n", id)
 	}
 }
