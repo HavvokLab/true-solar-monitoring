@@ -22,10 +22,11 @@ func main() {
 
 	repo := repo.NewSolarRepo(elastic)
 	for _, id := range documentIds {
-		err := repo.DeleteDocumentInIndex("solarcell-2023.11.*", id)
+		err := repo.DeleteDocumentInIndex("solarcell-2023.*", id)
 		if err != nil {
 			fmt.Println(err)
+		} else {
+			fmt.Printf("Document with id %s deleted\n", id)
 		}
-		fmt.Printf("Document with id %s deleted\n", id)
 	}
 }
