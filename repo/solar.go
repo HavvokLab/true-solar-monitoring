@@ -24,6 +24,7 @@ type SolarRepo interface {
 	GetUniquePlantByIndex(index string) ([]*elastic.AggregationBucketKeyItem, error)
 	UpdateOwnerToIndex(index, owner string) error
 	DeleteIndex(index string) error
+	DeleteDocumentInIndex(index, id string) error
 }
 
 type solarRepo struct {
@@ -629,4 +630,9 @@ func (r *solarRepo) DeleteIndex(index string) error {
 	}
 
 	return nil
+}
+
+func (r *solarRepo) DeleteDocumentInIndex(index, id string) error {
+	_, err := r.elastic.Delete().Index(index).Id(id).Do(context.Background())
+	return err
 }
